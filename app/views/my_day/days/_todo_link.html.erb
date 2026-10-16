@@ -1,20 +1,25 @@
 <%# locals: (todo:, current:, number: nil) %>
-<%# One piece of work in the list or the priorities, on one line: its state, its title, its
-    engagement's ref (the client in the tooltip) and when it's due. A box in the margin picks it for
-    the bulk bar (x). j / k move through the rows (the core's keyboard controller), Enter or o
-    opens one on the right; drag it onto Priorities (or back off). %>
-<div class="<%= class_names("my-day-row", "my-day-row--done": todo.status == "done", "my-day-row--waiting": todo.status.in?(MyDay::Day::WAITING)) %>" draggable="true"
+<%# One piece of work in the list or the priorities: its number (in the priorities), its state
+    (the dot, which a box takes over to pick it for the bulk bar, x), its title with the client
+    under it, its engagement's ref and when it's due. j / k move through the rows (the core's
+    keyboard controller), Enter or o opens one on the right; drag it onto Priorities (or back off). %>
+<div class="<%= class_names("my-day-row", "my-day-row--current": current, "my-day-row--done": todo.status == "done", "my-day-row--waiting": todo.status.in?(MyDay::Day::WAITING)) %>" draggable="true"
      data-id="<%= todo.id %>" data-drag-and-drop-target="item" data-filter-target="item">
-  <input type="checkbox" class="checkbox my-day-row__check" value="<%= todo.id %>" aria-label="Pick <%= todo.title %>"
-         data-bulk-target="item" data-action="bulk#update" data-keys="x">
-  <%= link_to my_day_open_path(todo), class: class_names("my-day-link", "my-day-link--done": todo.status == "done"),
-        draggable: false, title: "#{todo.title} · #{todo.engagement.ref} #{todo.engagement.title} · #{todo.client.name}",
-        aria: { current: ("page" if current) }, data: { turbo_action: "replace" } do %>
-    <% if number %>
-      <span class="my-day-number"><%= number %></span>
-    <% end %>
+  <% if number %>
+    <span class="my-day-number"><%= number %></span>
+  <% end %>
+  <span class="my-day-row__mark">
     <%= my_day_marker todo %>
-    <span class="my-day-link__title"><%= todo.title %></span>
+    <input type="checkbox" class="checkbox my-day-row__check" value="<%= todo.id %>" aria-label="Pick <%= todo.title %>"
+           data-bulk-target="item" data-action="bulk#update" data-keys="x">
+  </span>
+  <%= link_to my_day_open_path(todo), class: "my-day-link", draggable: false,
+        title: "#{todo.title} · #{todo.engagement.ref} #{todo.engagement.title}",
+        aria: { current: ("page" if current) }, data: { turbo_action: "replace" } do %>
+    <span class="my-day-link__text">
+      <span class="my-day-link__title"><%= todo.title %></span>
+      <span class="my-day-link__client"><%= todo.client.name %></span>
+    </span>
     <span class="my-day-link__ref"><%= todo.engagement.ref %></span>
     <%= my_day_due todo %>
   <% end %>

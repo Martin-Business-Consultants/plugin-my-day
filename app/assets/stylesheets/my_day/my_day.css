@@ -174,7 +174,7 @@
   }
 
   .my-day-priorities__list:not(:empty) {
-    margin-block-start: var(--block-space-half);
+    margin-block: var(--block-space-half) 0;
   }
 
   .my-day-priorities__drop {
@@ -217,6 +217,7 @@
     align-items: center;
     display: flex;
     gap: 0.5em;
+    padding-inline: 0.55em; /* the rows' own, so the heading lines up with their dots */
   }
 
   .my-day-group__title {
@@ -243,12 +244,43 @@
     .my-day-group__count { background-color: color-mix(in oklch, var(--color-negative) 12%, transparent); color: var(--color-negative); }
   }
 
-  /* A row: the box that picks it sits in the margin, so nothing shifts when it shows; it shows on
-     hover, on the keyboard's row (j / k), when ticked, and on every row once any is picked. */
+  /* Rows: each one block with its own padding, so a row, the drop row and the headings share one
+     edge. The dot sits in a slot the pick box takes over: on hover, on the keyboard's row (j / k),
+     when ticked, and on every row once any is picked. */
+  .my-day-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
   .my-day-row {
+    align-items: center;
     border-radius: var(--radius-control);
     cursor: grab;
-    position: relative;
+    display: flex;
+    gap: 0.55em;
+    padding: 0.4em 0.55em;
+
+    &:hover { background-color: var(--color-ink-lightest); }
+  }
+
+  .my-day-row--current,
+  .my-day-row--current:hover,
+  .my-day-row:has(.my-day-row__check:checked) {
+    background-color: var(--color-selected-light);
+  }
+
+  .my-day-row__mark {
+    block-size: 1rem;
+    display: grid;
+    flex-shrink: 0;
+    inline-size: 1rem;
+    place-items: center;
+
+    > * {
+      grid-area: 1 / 1;
+      transition: opacity 120ms ease;
+    }
   }
 
   .my-day-row__check.checkbox {
@@ -258,13 +290,9 @@
     color: var(--color-link);
     cursor: pointer;
     inline-size: 1rem;
-    inset-block-start: 50%;
-    inset-inline-start: -1.3rem;
     margin: 0;
     opacity: 0;
-    position: absolute;
-    transform: translateY(-50%);
-    transition: opacity 120ms ease, background-color 120ms ease, border-color 120ms ease;
+    transform: none;
 
     &::before {
       background-color: var(--color-canvas);
@@ -276,44 +304,49 @@
     &:hover { border-color: var(--color-ink-medium); }
     &:checked { background-color: var(--color-link); border-color: var(--color-link); }
     &:focus-visible { outline: 2px solid var(--color-link); outline-offset: 2px; }
+  }
 
-    .my-day-row:is(:hover, :focus-within, [data-keyboard-current]) &,
-    &:checked,
-    [data-bulk-active] & {
-      opacity: 1;
-    }
+  .my-day-row:is(:hover, :focus-within, [data-keyboard-current]),
+  .my-day-row:has(.my-day-row__check:checked),
+  [data-bulk-active] .my-day-row {
+    .my-day-row__check { opacity: 1; }
+    .my-day-row__mark > :not(.my-day-row__check) { opacity: 0; }
   }
 
   .my-day-link {
     align-items: center;
-    border-radius: var(--radius-control);
     color: var(--color-ink-darker);
     display: flex;
+    flex: 1;
     font-size: var(--text-small);
     gap: 0.55em;
-    margin-inline: -0.55em;
-    padding: 0.45em 0.55em;
+    min-inline-size: 0;
     text-decoration: none;
 
-    &:hover { background-color: var(--color-ink-lightest); }
-
     &[aria-current="page"] {
-      background-color: var(--color-selected-light);
       color: var(--color-ink);
       font-weight: 500;
     }
   }
 
-  .my-day-row:has(.my-day-row__check:checked) > .my-day-link {
-    background-color: var(--color-selected-light);
+  .my-day-link__text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-inline-size: 0;
   }
 
-  .my-day-link__title {
-    flex: 1;
-    min-inline-size: 0;
+  .my-day-link__title,
+  .my-day-link__client {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .my-day-link__client {
+    color: var(--color-ink-medium);
+    font-size: var(--text-x-small);
+    font-weight: 400;
   }
 
   .my-day-link__ref {
@@ -329,18 +362,19 @@
     font-size: var(--text-x-small);
     font-variant-numeric: tabular-nums;
     font-weight: 600;
-    inline-size: 1em;
+    inline-size: 0.8em;
     text-align: end;
   }
 
   /* Waiting on someone (in review, blocked): quieter. Done: a green check, the row tinted. */
-  .my-day-row--waiting .my-day-link:not([aria-current="page"]) {
+  .my-day-row--waiting:not(.my-day-row--current) .my-day-link {
     color: var(--color-ink-medium);
   }
 
-  .my-day-link--done:not([aria-current="page"]) {
+  .my-day-row--done:not(.my-day-row--current) {
     background-color: oklch(var(--lch-green-lightest));
-    color: oklch(var(--lch-green-darkest));
+
+    .my-day-link { color: oklch(var(--lch-green-darkest)); }
   }
 
   .my-day-dot {
@@ -528,7 +562,10 @@
     background: none;
     border: 0;
     color: inherit;
+    field-sizing: content;
     font: inherit;
+    min-inline-size: 6ch;
+    outline: none;
     padding: 0;
   }
 

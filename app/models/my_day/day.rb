@@ -1,7 +1,7 @@
 module MyDay
   # A person's day: the open work they lead or are on, found by search and narrowed by when it's
   # due, in groups to work down (late, today, this week, later, no date, then what's in review or
-  # blocked), oldest first in each, and their priorities.
+  # blocked), oldest first in each, and their priorities (which the groups leave out).
   class Day
     SHOWS = { "open" => "Everything open", "today" => "Due today or late", "week" => "Due this week",
               "done" => "Done this week", "all" => "Everything" }.freeze
@@ -36,7 +36,8 @@ module MyDay
     def groups
       today = Date.current
       week = today + 7
-      buckets = todos.group_by do |todo|
+      pinned = priorities.pins.map(&:todo_id)
+      buckets = todos.reject { it.id.in?(pinned) }.group_by do |todo|
         if todo.status == "done" then "done"
         elsif todo.status.in?(WAITING) then todo.status
         elsif todo.due_on.nil? then "undated"

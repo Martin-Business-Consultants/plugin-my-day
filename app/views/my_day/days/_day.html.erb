@@ -55,7 +55,7 @@
         <% if priority_todos.empty? %>
           <p class="my-day-priorities__intro txt-small margin-none">Today's few that matter most, in the order you'll do them. Drag work up from the list, or pick it and add it.</p>
         <% end %>
-        <nav class="scope-nav my-day-priorities__list" aria-label="Priorities" data-drag-drop-item-container>
+        <nav class="my-day-rows my-day-priorities__list" aria-label="Priorities" data-drag-drop-item-container>
           <% priority_todos.each_with_index do |priority, index| %>
             <%# herb:key "priority-#{priority.id}" %>
             <%= render "my_day/days/todo_link", todo: priority, current: priority == todo, number: index + 1 %>
@@ -79,10 +79,10 @@
               <h2 class="my-day-group__title"><%= group.title %></h2>
               <span class="my-day-group__count"><%= group.todos.size %></span>
             </header>
-            <nav class="scope-nav" aria-label="<%= group.title %>">
+            <nav class="my-day-rows" aria-label="<%= group.title %>">
               <% group.todos.each do |item| %>
                 <%# herb:key item.id %>
-                <%= render "my_day/days/todo_link", todo: item, current: item == todo && !priority_todos.include?(todo), number: nil %>
+                <%= render "my_day/days/todo_link", todo: item, current: item == todo, number: nil %>
               <% end %>
             </nav>
           </section>
