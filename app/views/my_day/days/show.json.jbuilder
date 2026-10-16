@@ -8,7 +8,7 @@ todo_json = lambda do |json, todo|
 end
 priorities = day.priority_todos
 
-json.summary "#{priorities.size} #{"priority".pluralize(priorities.size)} (#{my_day_progress(priorities)}), " \
+json.summary "#{priorities.size} #{"priority".pluralize(priorities.size)} of #{MyDay::Bundle::LIMIT}, " \
   "#{day.todos.size} #{"piece".pluralize(day.todos.size)} of work (#{MyDay::Day::SHOWS[day.show].downcase}" \
   "#{", matching “#{day.query}”" if day.query.present?})#{"; open: #{@todo.title}" if @todo}"
 json.show day.show

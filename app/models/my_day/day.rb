@@ -45,9 +45,21 @@ module MyDay
         .filter_map { |key, title| Group.new(key: key, title: title, todos: buckets[key]) if buckets[key] }
     end
 
-    def priorities = @priorities ||= Bundle.priorities_for(user).tap { it.pins.load }
+    # The person's priorities, without what's finished: work done (or gone from the core) falls off,
+    # freeing its place. The event subscriber usually has already; this catches the rest.
+    def priorities
+      @priorities ||= Bundle.priorities_for(user).tap do |bundle|
+        live = Todo.where(id: bundle.pins.map(&:todo_id)).where.not(status: "done").pluck(:id)
+        stale = bundle.pins.reject { it.todo_id.in?(live) }
+        if stale.any?
+          Pin.where(id: stale.map(&:id)).delete_all
+          bundle.pins.reset
+        end
+        bundle.pins.load
+      end
+    end
 
-    # The priorities' todos in order, still open or not, whatever the filter or search.
+    # The priorities' todos in order, whatever the filter or search.
     def priority_todos = @priority_todos ||= priorities.todos_from(pinned_todos)
 
     def pinned_todos

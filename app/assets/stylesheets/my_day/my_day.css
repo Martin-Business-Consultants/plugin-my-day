@@ -198,6 +198,12 @@
     outline: none;
   }
 
+  .my-day-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space-half);
+  }
+
   .my-day-group__header {
     align-items: center;
     display: flex;
@@ -318,10 +324,6 @@
     transition: rotate 120ms ease;
   }
 
-  .my-day-priorities__done {
-    color: oklch(var(--lch-green-dark));
-    font-weight: 600;
-  }
 
   .my-day-priorities__count {
     color: var(--color-ink-medium);
@@ -409,6 +411,18 @@
   /* A picked row is tinted, as the core's tables tint theirs. */
   .my-day-row:has(.my-day-row__check:checked) > .my-day-link {
     background-color: var(--color-selected-light);
+  }
+
+  /* The nav's filter ("/") hides the rows that don't match: a group with none left goes too, and
+     the priorities' empty places hide while it's filtering, so only the matches remain. */
+  #my_day {
+    .my-day-group:not(:has(.my-day-row:not([hidden]))) {
+      display: none;
+    }
+
+    &:has(.my-day-row[hidden]) .my-day-slots {
+      display: none;
+    }
   }
 
   .my-day-split .bulk-bar {

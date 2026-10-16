@@ -23,6 +23,9 @@
       <div class="my-day-tools">
         <%= form_with url: my_day_day_path, method: :get, class: "my-day-search", data: { controller: "form", turbo_action: "replace" } do |form| %>
           <%= hidden_field_tag :show, day.show, id: nil %>
+          <% if todo %>
+            <%= hidden_field_tag :todo, todo.id, id: nil %>
+          <% end %>
           <label class="input my-day-search__box">
             <%= icon_tag "search" %>
             <%= form.search_field :q, value: day.query, id: "my_day_search", class: "full-width", placeholder: "Search your work…",
@@ -50,9 +53,6 @@
           <%= icon_tag "caret-down", class: "my-day-priorities__caret" %>
           <%= icon_tag "pinned" %>
           <strong>Priorities</strong>
-          <% if priority_todos.any? %>
-            <span class="<%= class_names("txt-x-small", "txt-subtle": priority_todos.any? { it.status != "done" }, "my-day-priorities__done": priority_todos.all? { it.status == "done" }) %>"><%= my_day_progress priority_todos %></span>
-          <% end %>
           <span class="my-day-priorities__count txt-x-small" title="Priorities hold <%= MyDay::Bundle::LIMIT %>"><%= priority_todos.size %>/<%= MyDay::Bundle::LIMIT %></span>
         </summary>
         <nav class="scope-nav" aria-label="Priorities" data-drag-drop-item-container>
@@ -82,7 +82,7 @@
         <div data-drag-drop-item-container hidden></div>
         <% day.groups.each do |group| %>
           <%# herb:key group.key %>
-          <section class="settings__section flex flex-column gap-half" aria-label="<%= group.title %>">
+          <section class="settings__section my-day-group" aria-label="<%= group.title %>">
             <header class="my-day-group__header">
               <h2 class="divider"><%= group.title %></h2>
               <span class="<%= class_names("txt-x-small", "txt-subtle": group.key != "late", "my-day-due--late": group.key == "late") %>"><%= group.todos.size %></span>

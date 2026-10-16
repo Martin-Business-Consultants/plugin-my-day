@@ -9,6 +9,10 @@ module MyDay
     def update
       todo = Todo.find(params[:todo_id])
       if change_status(todo, params.expect(:status))
+        if todo.status == "done" && Pin.where(todo_id: todo.id).delete_all.positive?
+          return back_to_day(todo: todo.id, notice: "“#{todo.title}” is done, and off your priorities.")
+        end
+
         back_to_day(todo: todo.id, notice: "“#{todo.title}” is #{todo.status.humanize.downcase}.")
       else
         back_to_day(todo: todo.id, alert: todo.errors.full_messages.to_sentence)

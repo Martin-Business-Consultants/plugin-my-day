@@ -61,3 +61,6 @@ Read first, in Runwell's repository:
   (`BulkHelper`, the `bulk` controller on `<main>`): status, due date and lead go to the core's
   `bulk_todos_path`; priorities to `BulkPrioritiesController`. The open-a-todo link helper is
   `my_day_open_path`: `my_day_todo_path` is the update route's.
+- Done work falls off the priorities: the `my_day.events` subscriber drops a todo's pins on its
+  `todo.status` event to done (from anywhere), `StatusesController` does it at once, and
+  `Day#priorities` prunes pins whose todo is done or gone.

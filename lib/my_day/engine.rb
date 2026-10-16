@@ -24,6 +24,18 @@ module MyDay
       end
     end
 
+    # Work marked done anywhere (here, the Work pages, the bulk bar, an agent) falls off everyone's
+    # priorities, freeing its place. Events come from the core's EventPublishJob, after the change.
+    initializer "my_day.events" do
+      ActiveSupport::Notifications.subscribe("event.runwell") do |*, payload|
+        event = payload[:event]
+        next unless Runwell::Plugins.enabled?(:my_day) && event.kind == "todo.status" && event.subject_type == "Todo"
+        next unless event.payload.to_h.with_indifferent_access[:to] == "done"
+
+        MyDay::Pin.where(todo_id: event.subject_id).delete_all
+      end
+    end
+
     initializer "my_day.helpers" do
       ActiveSupport.on_load(:action_view) { include MyDay::DaysHelper }
     end

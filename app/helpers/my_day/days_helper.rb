@@ -37,10 +37,5 @@ module MyDay
       late = todo.status != "done" && todo.due_on < today
       tag.span(late ? "Late · #{text}" : text, class: class_names("my-day-due", "my-day-due--late": late))
     end
-
-    # "2 of 5 done" for the priorities.
-    def my_day_progress(todos)
-      "#{todos.count { it.status == "done" }} of #{todos.size} done"
-    end
   end
 end

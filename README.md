@@ -29,7 +29,8 @@ Then switch it on in Settings › Plugins.
   date or lead all at once (the core's bulk actions, so each todo's history records it).
 - **Priorities, at the top**: a drop area that gathers the day's priorities, five at most, with
   its free places shown. Drag work onto it (in the order you'll do it, or drag within it to
-  reorder), and drag it back onto the list to take it off. Click it to unfold its work, numbered,
+  reorder), and drag it back onto the list to take it off. Work marked done falls off on its own
+  (wherever it's marked), freeing its place. Click it to unfold its work, numbered,
   with how much is done; finished work turns green. Your priorities are yours alone.
 - **On the right, the piece you picked**: a card with its engagement and client, and everything
   changed in place: its status (the badge is a dropdown), its due date (saved as you pick it), who's
