@@ -192,11 +192,6 @@
     }
   }
 
-  .my-day-priorities--empty,
-  .my-day-priorities.drag-and-drop__hover-container {
-    border-color: var(--color-ink-light);
-  }
-
   .my-day-priorities.drag-and-drop__hover-container {
     background-color: oklch(var(--lch-blue-lightest));
     border-color: var(--color-link);
@@ -228,9 +223,29 @@
     font-weight: 600;
   }
 
-  .my-day-priorities__hint {
-    padding: var(--block-space) var(--inline-space-half) var(--block-space-half);
-    text-align: center;
+  .my-day-priorities__count {
+    color: var(--color-ink-medium);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The free places, numbered on from the work: dashed rows the next drop fills. */
+  .my-day-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+    list-style: none;
+    margin: var(--block-space-half) 0 0;
+    padding: 0;
+  }
+
+  .my-day-slot {
+    align-items: center;
+    border: 1px dashed var(--color-ink-lighter);
+    border-radius: calc(0.4em * var(--radius-scale, 1));
+    display: flex;
+    gap: 0.6em;
+    min-block-size: 2.25rem;
+    padding-inline: 0.5em;
   }
 
   .my-day-link[draggable="true"] {

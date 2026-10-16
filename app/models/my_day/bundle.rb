@@ -3,6 +3,7 @@ module MyDay
   # to do it. One each, made the first time it's needed. Only its person sees it.
   class Bundle < ApplicationRecord
     NAME = "Priorities".freeze
+    LIMIT = 5
 
     belongs_to :user
     has_many :pins, -> { order(:position, :id) }, dependent: :delete_all, inverse_of: :bundle
@@ -19,11 +20,14 @@ module MyDay
     def todos_from(todos_by_id) = pins.filter_map { todos_by_id[it.todo_id] }
 
     def include?(todo) = pins.any? { it.todo_id == todo.id }
+    def full? = pins.size >= LIMIT
 
     # Puts a todo just before another (a todo id), or at the end: added if it wasn't here, moved
-    # if it was.
+    # if it was. Five at most: a sixth isn't added (false).
     def place(todo, before: nil)
       list = pins.to_a
+      return false if full? && !include?(todo)
+
       pin = list.find { it.todo_id == todo.id } || pins.build(todo_id: todo.id)
       list.delete(pin)
       at = list.index { it.todo_id.to_s == before.to_s } if before.present?

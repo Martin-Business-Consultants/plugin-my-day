@@ -3,7 +3,7 @@ module MyDay
   class PrioritiesController < ApplicationController
     allow_staff
     agent_tool :add_my_day_priority, on: :create, title: "Add work to my priorities",
-      description: "Puts a piece of work in your priorities at the top of your day: at the end, or just before another (before: its todo id). Already there? It moves.",
+      description: "Puts a piece of work in your priorities at the top of your day: at the end, or just before another (before: its todo id). Already there? It moves. They hold five; a sixth is refused.",
       params: { before: "integer" }, next_tools: %i[show_my_day]
     agent_tool :move_my_day_priority, on: :update, title: "Move work up or down my priorities",
       description: "One place up or down.", params: { direction: [ "up", "down" ] }
@@ -17,8 +17,11 @@ module MyDay
     end
 
     def create
-      @priorities.place(@todo, before: params[:before])
-      back_to_day(notice: "“#{@todo.title}” is in your priorities.")
+      if @priorities.place(@todo, before: params[:before])
+        back_to_day(notice: "“#{@todo.title}” is in your priorities.")
+      else
+        back_to_day(alert: "Your priorities hold #{Bundle::LIMIT}: take one off (or finish it) before adding “#{@todo.title}”.")
+      end
     end
 
     def update

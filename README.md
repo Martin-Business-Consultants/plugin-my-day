@@ -19,13 +19,14 @@ Then switch it on in Settings › Plugins.
 
 - **My day**, in the nav: two columns, half and half.
 - **On the left, your work**: everything you lead or are on, grouped by when it's due (late,
-  today, this week, later, no date), each with its state, where it's from and when it's due (late
-  ones in red). A search box above it (as you type: the title, its engagement or its client) and a
-  filter: everything open, due today or late, due this week, done this week, or everything.
-- **Priorities, at the top**: a drop area that gathers the day's priorities. Drag work onto it
-  (in the order you'll do it, or drag within it to reorder), and drag it back onto the list to
-  take it off. Click it to unfold its work, numbered, with how much is done; finished work turns
-  green. Your priorities are yours alone.
+  today, this week, later, no date), oldest first in each, each with its state, where it's from
+  and when it's due (late ones in red). A search box above it (as you type: the title, its
+  engagement or its client) and a filter: everything open, due today or late, due this week, done
+  this week, or everything.
+- **Priorities, at the top**: a drop area that gathers the day's priorities, five at most, with
+  its free places shown. Drag work onto it (in the order you'll do it, or drag within it to
+  reorder), and drag it back onto the list to take it off. Click it to unfold its work, numbered,
+  with how much is done; finished work turns green. Your priorities are yours alone.
 - **On the right, the piece you picked**: a card with its engagement and client, due date and
   who's on it, its status in one click (planned, in progress, in review, blocked, done), its
   details, its place in your priorities (add, move up or down, remove: the same without dragging)

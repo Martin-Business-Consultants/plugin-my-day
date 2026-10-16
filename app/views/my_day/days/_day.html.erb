@@ -42,6 +42,7 @@
           <% if priority_todos.any? %>
             <span class="<%= class_names("txt-x-small", "txt-subtle": priority_todos.any? { it.status != "done" }, "my-day-priorities__done": priority_todos.all? { it.status == "done" }) %>"><%= my_day_progress priority_todos %></span>
           <% end %>
+          <span class="my-day-priorities__count txt-x-small" title="Priorities hold <%= MyDay::Bundle::LIMIT %>"><%= priority_todos.size %>/<%= MyDay::Bundle::LIMIT %></span>
         </summary>
         <nav class="scope-nav" aria-label="Priorities" data-drag-drop-item-container>
           <% priority_todos.each_with_index do |priority, index| %>
@@ -49,8 +50,20 @@
             <%= render "my_day/days/todo_link", todo: priority, current: priority == todo, number: index + 1 %>
           <% end %>
         </nav>
-        <% if priority_todos.empty? %>
-          <p class="my-day-priorities__hint txt-small txt-subtle margin-none">Drag work here to gather today's priorities, in the order you'll do them.</p>
+        <%# The places still free, numbered on from the work in it: where the next drop lands. %>
+        <% free = MyDay::Bundle::LIMIT - priority_todos.size %>
+        <% if free.positive? %>
+          <ol class="my-day-slots">
+            <% free.times do |index| %>
+              <%# herb:key "slot-#{index}" %>
+              <li class="my-day-slot txt-x-small txt-subtle">
+                <span class="my-day-number"><%= priority_todos.size + index + 1 %></span>
+                <% if index.zero? %>
+                  <span>Drag work here</span>
+                <% end %>
+              </li>
+            <% end %>
+          </ol>
         <% end %>
       </details>
 

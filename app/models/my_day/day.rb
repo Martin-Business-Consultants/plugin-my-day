@@ -1,6 +1,7 @@
 module MyDay
   # A person's day: the open work they lead or are on, found by search and narrowed by when it's
-  # due, in groups to work down (late, today, this week, later, no date), and their priorities.
+  # due, in groups to work down (late, today, this week, later, no date), oldest first in each,
+  # and their priorities.
   class Day
     SHOWS = { "open" => "Everything open", "today" => "Due today or late", "week" => "Due this week",
               "done" => "Done this week", "all" => "Everything" }.freeze
@@ -19,7 +20,7 @@ module MyDay
         scope = Todo.assigned_to(user).includes(:owner, { assignments: :user }, engagement: :client)
         scope = filtered(scope)
         scope = searched(scope) if query.present?
-        scope.order(Arel.sql("todos.due_on IS NULL"), :due_on, :id).to_a
+        scope.order(:created_at, :id).to_a
       end
     end
 

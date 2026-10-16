@@ -39,8 +39,9 @@ Read first, in Runwell's repository:
   (title, engagement, client), in groups by due date, plus their priorities and every prioritised
   todo looked up once (`pinned_todos`, `{ id => todo }`).
 - Priorities are a `Bundle` (one per person, `Bundle.priorities_for`, made when first needed) of
-  `Pin`s (`todo_id`, `position`): `place(todo, before:)` adds or moves, `move(todo, :up / :down)`,
-  `unpin`. A todo gone from the core is skipped (`todos_from`), never an error.
+  `Pin`s (`todo_id`, `position`), five at most (`LIMIT`): `place(todo, before:)` adds or moves
+  (false for a sixth), `move(todo, :up / :down)`, `unpin`. A todo gone from the core is skipped
+  (`todos_from`), never an error.
 - Status changes go through the core's verb (`todo.update(status:)`), so the todo's history
   records them as anywhere else.
 - The page is one page, reloaded in place: links and forms land back on `/my-day` with the same

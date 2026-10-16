@@ -21,7 +21,10 @@ module MyDay
       def back_to_day(todo: params[:todo], **options)
         session[:my_day_open] = true if @priorities_open
         respond_to do |format|
-          format.turbo_stream { render turbo_stream: turbo_stream.refresh(request_id: nil) }
+          format.turbo_stream do
+            flash[:alert] = options[:alert] if options[:alert] # shown by the refresh
+            render turbo_stream: turbo_stream.refresh(request_id: nil)
+          end
           format.any { redirect_to my_day_day_path({ todo: todo, show: params[:show], q: params[:q] }.compact_blank), **options }
         end
       end

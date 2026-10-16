@@ -61,6 +61,8 @@
             class: "btn" do %>
         <%= icon_tag "unpinned" %> <span>Remove</span>
       <% end %>
+    <% elsif priority_todos.size >= MyDay::Bundle::LIMIT %>
+      <span class="my-day-card__priority txt-small"><%= icon_tag "pinned" %> Priorities are full (<%= MyDay::Bundle::LIMIT %>)</span>
     <% else %>
       <%= button_to my_day_priority_path(todo), method: :post, params: my_day_return_params,
             class: "btn" do %>
