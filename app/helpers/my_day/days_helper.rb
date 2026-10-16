@@ -22,7 +22,17 @@ module MyDay
       end
     end
 
-    # When it's due, in words: late ones say so.
+    # The greeting's line: how many priorities, and what's late or due today.
+    def my_day_summary(day)
+      late, today = day.late_count, day.due_today_count
+      parts = [ pluralize(day.priority_todos.size, "priority") ]
+      parts << tag.span("#{late} late", class: "my-day-greeting__late") if late.positive?
+      parts << "#{today} due today" if today.positive?
+      parts << "nothing late" if late.zero? && today.zero?
+      safe_join(parts, " · ")
+    end
+
+    # When it's due, as a small pill: late ones red and saying so.
     def my_day_due(todo)
       return if todo.due_on.nil?
 
@@ -35,7 +45,7 @@ module MyDay
       else todo.due_on.strftime("%-d %b")
       end
       late = todo.status != "done" && todo.due_on < today
-      tag.span(late ? "Late · #{text}" : text, class: class_names("my-day-due", "my-day-due--late": late))
+      tag.span(late ? "Late · #{text}" : text, class: class_names("my-day-due", "my-day-due--late": late, "my-day-due--today": !late && todo.due_on == today))
     end
   end
 end

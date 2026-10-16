@@ -1,24 +1,26 @@
 <%# locals: (day:, todo:, open: nil) %>
-<%# Your work on the left, the piece you picked on the right. Picking one, searching or changing
-    something reloads the page in place (Turbo's morphing refresh, scroll kept: the core's way,
-    which Lexxy's editor in the notes needs); the search box is kept as you type. Work is dragged
-    onto Priorities to add it (or within them to reorder) and back onto the list to take it off:
-    the core's drag-and-drop controller, whose answer refreshes the page. Priorities unfold when
-    the piece on the right is one of them, when there are none yet (the drop area), and after a
-    change to them (open). %>
+<%# Your work on the left (a greeting, search and tabs, your priorities in a panel of their own,
+    then the list), the piece you picked on the right. Picking one, searching or changing something
+    reloads the page in place (Turbo's morphing refresh, scroll kept: the core's way, which Lexxy's
+    editor in the notes needs); the search box is kept as you type. Work is dragged onto Priorities
+    to add it (or within them to reorder) and back onto the list to take it off: the core's
+    drag-and-drop controller, whose answer refreshes the page. Priorities unfold when the piece on
+    the right is one of them, when there are none yet (the drop area), and after a change to them. %>
 <% back = { show: params[:show], q: params[:q], todo: todo&.id }.compact_blank %>
 <% priority_todos = day.priority_todos %>
+<% limit = MyDay::Bundle::LIMIT %>
+<% full = priority_todos.size >= limit %>
 <div id="my_day">
   <section class="settings settings--split my-day-split">
-    <div class="settings__panel panel shadow txt-align-start flex flex-column gap"
+    <div class="my-day-left"
          data-controller="drag-and-drop"
          data-drag-and-drop-dragged-item-class="drag-and-drop__dragged-item"
          data-drag-and-drop-hover-container-class="drag-and-drop__hover-container"
          data-action="dragstart->drag-and-drop#dragStart dragover->drag-and-drop#dragOver drop->drag-and-drop#drop dragend->drag-and-drop#dragEnd">
-      <div class="page-heading">
-        <h1 class="page-title">My day</h1>
-        <span class="txt-small txt-subtle"><%= Date.current.strftime("%A, %-d %B") %></span>
-      </div>
+      <header class="my-day-greeting">
+        <h1 class="my-day-greeting__date"><%= Date.current.strftime("%A, %-d %B") %></h1>
+        <p class="my-day-greeting__summary txt-small margin-none"><%= my_day_summary day %></p>
+      </header>
 
       <div class="my-day-tools">
         <%= form_with url: my_day_day_path, method: :get, class: "my-day-search", data: { controller: "form", turbo_action: "replace" } do |form| %>
@@ -32,60 +34,50 @@
                   autocomplete: "off", aria: { label: "Search your work" }, data: { turbo_permanent: true, action: "input->form#debouncedSubmit" } %>
           </label>
         <% end %>
-        <%= render "layouts/shared/quick_filter", title: "Show…", param: :show, current: day.show, options: MyDay::Day::SHOWS.invert.to_a %>
+        <nav class="my-day-tabs" aria-label="Show">
+          <% MyDay::Day::TABS.each do |key, label| %>
+            <%# herb:key key %>
+            <%= link_to label, my_day_day_path({ show: (key unless key == "open"), q: day.query.presence, todo: todo&.id }.compact),
+                  class: "my-day-tabs__tab", aria: { current: ("page" if day.show == key) }, data: { turbo_action: "replace" } %>
+          <% end %>
+        </nav>
       </div>
 
-      <%# Picked rows (x on the row you're on, or its box), acted on together: the core's bulk bar,
-          its work actions (Bulk::TodosController) and the priorities' own. %>
-      <% keep = my_day_return_params.merge(todo: todo&.id).compact_blank %>
-      <%= bulk_bar do %>
-        <%= bulk_button my_day_bulk_priorities_path, method: :post, label: "Add to priorities", params: keep %>
-        <%= bulk_button my_day_bulk_priorities_path, method: :delete, label: "Take off priorities", params: keep %>
-        <%= bulk_menu bulk_todos_path, method: :patch, name: "todo[status]", label: "Status", choices: MyDay::DaysHelper::STATUS_LABELS.invert.to_a %>
-        <%= bulk_date bulk_todos_path, method: :patch, name: "todo[due_on]", label: "Due date" %>
-        <%= bulk_menu bulk_todos_path, method: :patch, name: "todo[owner_id]", label: "Lead", choices: [ [ "Me", "me" ] ] + User.active.people.ordered.map { [ it.display_name, it.id ] } %>
-      <% end %>
-
-      <details class="<%= class_names("my-day-priorities", "my-day-priorities--empty": priority_todos.empty?) %>" <% if open || priority_todos.include?(todo) || priority_todos.empty? %>open<% end %>
+      <details class="<%= class_names("panel shadow my-day-priorities", "my-day-priorities--empty": priority_todos.empty?, "my-day-priorities--full": full) %>" <% if open || priority_todos.include?(todo) || priority_todos.empty? %>open<% end %>
                data-drag-and-drop-target="container" data-drag-and-drop-sortable="true"
                data-drag-and-drop-url="<%= my_day_priority_path("__id__", **back) %>">
         <summary class="my-day-priorities__summary">
           <%= icon_tag "caret-down", class: "my-day-priorities__caret" %>
-          <%= icon_tag "pinned" %>
-          <strong>Priorities</strong>
-          <span class="my-day-priorities__count txt-x-small" title="Priorities hold <%= MyDay::Bundle::LIMIT %>"><%= priority_todos.size %>/<%= MyDay::Bundle::LIMIT %></span>
+          <strong class="my-day-priorities__title">Priorities</strong>
+          <span class="my-day-priorities__count txt-x-small"><%= priority_todos.size %> of <%= limit %></span>
+          <progress class="my-day-priorities__meter" max="<%= limit %>" value="<%= priority_todos.size %>" aria-label="<%= priority_todos.size %> of <%= limit %> places used"></progress>
         </summary>
-        <nav class="scope-nav" aria-label="Priorities" data-drag-drop-item-container>
+        <% if priority_todos.empty? %>
+          <p class="my-day-priorities__intro txt-small margin-none">Today's few that matter most, in the order you'll do them. Drag work up from the list, or pick it and add it.</p>
+        <% end %>
+        <nav class="scope-nav my-day-priorities__list" aria-label="Priorities" data-drag-drop-item-container>
           <% priority_todos.each_with_index do |priority, index| %>
             <%# herb:key "priority-#{priority.id}" %>
             <%= render "my_day/days/todo_link", todo: priority, current: priority == todo, number: index + 1 %>
           <% end %>
         </nav>
-        <%# The places still free, numbered on from the work in it: where the next drop lands. %>
-        <% free = MyDay::Bundle::LIMIT - priority_todos.size %>
-        <% if free.positive? %>
-          <ol class="my-day-slots">
-            <% free.times do |index| %>
-              <%# herb:key "slot-#{index}" %>
-              <li class="my-day-slot txt-x-small txt-subtle">
-                <span class="my-day-number"><%= priority_todos.size + index + 1 %></span>
-                <% if index.zero? %>
-                  <span>Drag work here</span>
-                <% end %>
-              </li>
-            <% end %>
-          </ol>
+        <% if full %>
+          <p class="my-day-priorities__drop my-day-priorities__drop--full txt-x-small margin-none">Full: finish or remove one to add another.</p>
+        <% else %>
+          <p class="my-day-priorities__drop txt-x-small margin-none">
+            <%= icon_tag "add" %> Drag work here <span class="txt-subtle">· <%= pluralize(limit - priority_todos.size, "place") %> left</span>
+          </p>
         <% end %>
       </details>
 
-      <div class="flex flex-column gap" data-drag-and-drop-target="container" data-drag-and-drop-url="<%= my_day_priority_removal_path("__id__", **back) %>">
+      <div class="panel shadow my-day-list" data-drag-and-drop-target="container" data-drag-and-drop-url="<%= my_day_priority_removal_path("__id__", **back) %>">
         <div data-drag-drop-item-container hidden></div>
         <% day.groups.each do |group| %>
           <%# herb:key group.key %>
-          <section class="settings__section my-day-group" aria-label="<%= group.title %>">
+          <section class="<%= class_names("my-day-group", "my-day-group--#{group.key}") %>" aria-label="<%= group.title %>">
             <header class="my-day-group__header">
-              <h2 class="divider"><%= group.title %></h2>
-              <span class="<%= class_names("txt-x-small", "txt-subtle": group.key != "late", "my-day-due--late": group.key == "late") %>"><%= group.todos.size %></span>
+              <h2 class="my-day-group__title"><%= group.title %></h2>
+              <span class="my-day-group__count"><%= group.todos.size %></span>
             </header>
             <nav class="scope-nav" aria-label="<%= group.title %>">
               <% group.todos.each do |item| %>
@@ -106,6 +98,18 @@
             <% end %>
           </p>
         <% end %>
+
+        <%# Picked rows (x on the row you're on, or its box), acted on together: the core's bulk bar,
+            floating at the foot of the list; its work actions (Bulk::TodosController) and the
+            priorities' own. %>
+        <% keep = my_day_return_params.merge(todo: todo&.id).compact_blank %>
+        <%= bulk_bar do %>
+          <%= bulk_button my_day_bulk_priorities_path, method: :post, label: "Prioritize", params: keep %>
+          <%= bulk_button my_day_bulk_priorities_path, method: :delete, label: "Take off", params: keep %>
+          <%= bulk_menu bulk_todos_path, method: :patch, name: "todo[status]", label: "Status", choices: MyDay::DaysHelper::STATUS_LABELS.invert.to_a %>
+          <%= bulk_date bulk_todos_path, method: :patch, name: "todo[due_on]", label: "Due" %>
+          <%= bulk_menu bulk_todos_path, method: :patch, name: "todo[owner_id]", label: "Lead", choices: [ [ "Me", "me" ] ] + User.active.people.ordered.map { [ it.display_name, it.id ] } %>
+        <% end %>
       </div>
     </div>
 
@@ -113,7 +117,7 @@
       <% if todo %>
         <%= render "my_day/days/detail", day: day, todo: todo %>
       <% else %>
-        <p class="settings__panel panel shadow txt-small txt-subtle margin-none">Nothing to work on. Pick a piece of work on the left when there is.</p>
+        <p class="panel shadow txt-small txt-subtle margin-none my-day-card">Nothing to work on. Pick a piece of work on the left when there is.</p>
       <% end %>
     </div>
   </section>

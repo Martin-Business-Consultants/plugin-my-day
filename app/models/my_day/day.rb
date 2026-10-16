@@ -5,6 +5,8 @@ module MyDay
   class Day
     SHOWS = { "open" => "Everything open", "today" => "Due today or late", "week" => "Due this week",
               "done" => "Done this week", "all" => "Everything" }.freeze
+    # The same choices, short, as tabs.
+    TABS = { "open" => "Open", "today" => "Today", "week" => "Week", "done" => "Done", "all" => "All" }.freeze
     Group = Data.define(:key, :title, :todos)
     # Work waiting on someone else (a check, or whatever blocks it) goes to the bottom, in groups of
     # its own, below the work to do now.
@@ -26,6 +28,10 @@ module MyDay
         scope.order(:created_at, :id).to_a
       end
     end
+
+    # Whatever the filter or search: what's late, and what's due today, of this person's open work.
+    def late_count = Todo.assigned_to(user).open.where(due_on: ...Date.current).count
+    def due_today_count = Todo.assigned_to(user).open.where(due_on: Date.current).count
 
     def groups
       today = Date.current

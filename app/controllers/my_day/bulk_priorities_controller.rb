@@ -13,6 +13,7 @@ module MyDay
       @priorities = Bundle.priorities_for(person)
       ids = Array(params[:ids]).map(&:to_i)
       @todos = Todo.where(id: ids).index_by(&:id).values_at(*ids).compact
+      @todos = @todos.reject { it.status == "done" } if action_name == "create"
     end
 
     def create

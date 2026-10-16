@@ -17,7 +17,9 @@ Then switch it on in Settings › Plugins.
 
 ## What it does
 
-- **My day**, in the nav: two columns, half and half.
+- **My day**, in the nav: the list on the left (two fifths), the piece you picked on the right
+  (three fifths), which stays in view as you scroll. It opens with the day and what it holds
+  ("3 priorities · 1 late · 1 due today").
 - **On the left, your work**: everything you lead or are on, grouped by when it's due (late,
   today, this week, later, no date; work in review or blocked sits in its own groups at the
   bottom), oldest first in each, each with its state, where it's from and when it's due (late ones

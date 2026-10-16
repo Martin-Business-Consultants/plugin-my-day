@@ -17,7 +17,9 @@ module MyDay
     end
 
     def create
-      if @priorities.place(@todo, before: params[:before])
+      if @todo.status == "done"
+        back_to_day(alert: "“#{@todo.title}” is done: priorities are for what's still to do.")
+      elsif @priorities.place(@todo, before: params[:before])
         back_to_day(notice: "“#{@todo.title}” is in your priorities.")
       else
         back_to_day(alert: "Your priorities hold #{Bundle::LIMIT}: take one off (or finish it) before adding “#{@todo.title}”.")

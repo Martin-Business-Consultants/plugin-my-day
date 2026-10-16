@@ -1,85 +1,554 @@
 /* Linked on every page while My day is on (Runwell::Plugins.stylesheet). Runwell's design tokens
    (docs/theming.md), so themes reach these too. */
 @layer components {
+  /* Layout: the list two fifths, the card three; the card stays in view as the list scrolls. */
   .settings.settings--split.my-day-split {
     @media (min-width: 960px) {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
     }
   }
 
-  /* The picked piece's card, and its notes under it. */
-  .my-day-detail {
+  .my-day-left {
     display: flex;
     flex-direction: column;
     gap: var(--block-space);
+    inline-size: 100%;
     min-inline-size: 0;
+    text-align: start;
   }
 
-  .my-day-card {
+  .my-day-detail {
+    inline-size: 100%;
+    min-inline-size: 0;
+    text-align: start;
+
+    @media (min-width: 960px) {
+      inset-block-start: var(--block-space);
+      position: sticky;
+    }
+  }
+
+  /* The greeting: the day, and what it holds. */
+  .my-day-greeting {
     display: flex;
     flex-direction: column;
-    gap: var(--block-space);
+    gap: 0.2em;
+    padding-inline: 0.15em;
   }
 
-  .my-day-card__header {
+  .my-day-greeting__date {
+    font-size: var(--text-x-large, 1.6rem);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    margin: 0;
+  }
+
+  .my-day-greeting__summary {
+    color: var(--color-ink-medium);
+  }
+
+  .my-day-greeting__late {
+    color: var(--color-negative);
+    font-weight: 600;
+  }
+
+  /* Search, then the filter as tabs. */
+  .my-day-tools {
     display: flex;
     flex-direction: column;
     gap: var(--block-space-half);
   }
 
-  .my-day-card__heading {
-    align-items: start;
+  .my-day-search__box {
+    align-items: center;
+    color: var(--color-ink-medium);
     display: flex;
-    gap: var(--inline-space);
-    justify-content: space-between;
+    gap: var(--inline-space-half);
+  }
+
+  .my-day-search input {
+    background: none;
+    border: 0;
+    color: var(--color-ink);
+    font: inherit;
+    outline: none;
+  }
+
+  .my-day-tabs {
+    background-color: var(--color-ink-lightest);
+    border-radius: var(--radius-control);
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+  }
+
+  .my-day-tabs__tab {
+    border-radius: calc(var(--radius-control) - 2px);
+    color: var(--color-ink-medium);
+    flex: 1;
+    font-size: var(--text-x-small);
+    font-weight: 500;
+    padding: 0.4em 0.5em;
+    text-align: center;
+    text-decoration: none;
+
+    &:hover {
+      color: var(--color-ink);
+    }
+
+    &[aria-current="page"] {
+      background-color: var(--color-canvas);
+      box-shadow: 0 1px 2px oklch(var(--lch-black) / 8%);
+      color: var(--color-ink);
+    }
+  }
+
+  /* Priorities: the day's few, a panel of their own with an accent edge and a meter of places. */
+  .my-day-priorities.panel {
+    --panel-padding: var(--block-space) calc(var(--block-space) * 1.25);
+
+    border-color: color-mix(in oklch, var(--color-link) 35%, var(--color-ink-lighter));
+    border-inline-start: 3px solid var(--color-link);
+    transition: background-color 120ms ease, border-color 120ms ease;
+
+    &[open] .my-day-priorities__caret {
+      rotate: 0deg;
+    }
+  }
+
+  .my-day-priorities--full.panel {
+    background-color: color-mix(in oklch, var(--color-link) 5%, var(--color-canvas));
+  }
+
+  .my-day-priorities.panel.drag-and-drop__hover-container {
+    background-color: oklch(var(--lch-blue-lightest));
+    border-color: var(--color-link);
+  }
+
+  .my-day-priorities__summary {
+    align-items: center;
+    cursor: pointer;
+    display: grid;
+    gap: 0.35em 0.5em;
+    grid-template-columns: auto 1fr auto;
+    list-style: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+
+  .my-day-priorities__caret {
+    rotate: -90deg;
+    transition: rotate 120ms ease;
+  }
+
+  .my-day-priorities__title {
+    font-size: var(--text-medium);
+  }
+
+  .my-day-priorities__count {
+    color: var(--color-ink-medium);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .my-day-priorities__meter {
+    appearance: none;
+    background-color: var(--color-ink-lightest);
+    block-size: 4px;
+    border: 0;
+    border-radius: var(--radius-pill, 99rem);
+    grid-column: 1 / -1;
+    inline-size: 100%;
+    overflow: hidden;
+
+    &::-webkit-progress-bar { background-color: var(--color-ink-lightest); }
+    &::-webkit-progress-value { background-color: var(--color-link); border-radius: var(--radius-pill, 99rem); }
+    &::-moz-progress-bar { background-color: var(--color-link); border-radius: var(--radius-pill, 99rem); }
+  }
+
+  .my-day-priorities__intro {
+    color: var(--color-ink-medium);
+    margin-block-start: var(--block-space-half);
+  }
+
+  .my-day-priorities__list:not(:empty) {
+    margin-block-start: var(--block-space-half);
+  }
+
+  .my-day-priorities__drop {
+    align-items: center;
+    border: 1px dashed var(--color-ink-lighter);
+    border-radius: var(--radius-control);
+    color: var(--color-ink-dark);
+    display: flex;
+    gap: 0.4em;
+    justify-content: center;
+    margin-block-start: var(--block-space-half);
+    padding: 0.55em;
+
+    .icon {
+      --icon-size: 0.9em;
+    }
+  }
+
+  .my-day-priorities__drop--full {
+    border-style: solid;
+    border-color: transparent;
+    color: var(--color-ink-medium);
+  }
+
+  /* The list: small headings with a count, one line per piece of work. */
+  .my-day-list.panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space);
+    position: relative;
+  }
+
+  .my-day-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+  }
+
+  .my-day-group__header {
+    align-items: center;
+    display: flex;
+    gap: 0.5em;
+  }
+
+  .my-day-group__title {
+    color: var(--color-ink-medium);
+    font-size: var(--text-x-small);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  .my-day-group__count {
+    background-color: var(--color-ink-lightest);
+    border-radius: var(--radius-pill, 99rem);
+    color: var(--color-ink-medium);
+    font-size: var(--text-xx-small, 0.7rem);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    padding: 0.05em 0.55em;
+  }
+
+  .my-day-group--late {
+    .my-day-group__title { color: var(--color-negative); }
+    .my-day-group__count { background-color: color-mix(in oklch, var(--color-negative) 12%, transparent); color: var(--color-negative); }
+  }
+
+  /* A row: the box that picks it sits in the margin, so nothing shifts when it shows; it shows on
+     hover, on the keyboard's row (j / k), when ticked, and on every row once any is picked. */
+  .my-day-row {
+    border-radius: var(--radius-control);
+    cursor: grab;
+    position: relative;
+  }
+
+  .my-day-row__check.checkbox {
+    block-size: 1rem;
+    border-color: var(--color-ink-light);
+    border-radius: calc(0.3em * var(--radius-scale, 1));
+    color: var(--color-link);
+    cursor: pointer;
+    inline-size: 1rem;
+    inset-block-start: 50%;
+    inset-inline-start: -1.3rem;
+    margin: 0;
+    opacity: 0;
+    position: absolute;
+    transform: translateY(-50%);
+    transition: opacity 120ms ease, background-color 120ms ease, border-color 120ms ease;
+
+    &::before {
+      background-color: var(--color-canvas);
+      block-size: 0.6em;
+      box-shadow: none;
+      inline-size: 0.6em;
+    }
+
+    &:hover { border-color: var(--color-ink-medium); }
+    &:checked { background-color: var(--color-link); border-color: var(--color-link); }
+    &:focus-visible { outline: 2px solid var(--color-link); outline-offset: 2px; }
+
+    .my-day-row:is(:hover, :focus-within, [data-keyboard-current]) &,
+    &:checked,
+    [data-bulk-active] & {
+      opacity: 1;
+    }
+  }
+
+  .my-day-link {
+    align-items: center;
+    border-radius: var(--radius-control);
+    color: var(--color-ink-darker);
+    display: flex;
+    font-size: var(--text-small);
+    gap: 0.55em;
+    margin-inline: -0.55em;
+    padding: 0.45em 0.55em;
+    text-decoration: none;
+
+    &:hover { background-color: var(--color-ink-lightest); }
+
+    &[aria-current="page"] {
+      background-color: var(--color-selected-light);
+      color: var(--color-ink);
+      font-weight: 500;
+    }
+  }
+
+  .my-day-row:has(.my-day-row__check:checked) > .my-day-link {
+    background-color: var(--color-selected-light);
+  }
+
+  .my-day-link__title {
+    flex: 1;
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .my-day-link__ref {
+    color: var(--color-ink-medium);
+    flex-shrink: 0;
+    font-size: var(--text-x-small);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .my-day-number {
+    color: var(--color-ink-medium);
+    flex-shrink: 0;
+    font-size: var(--text-x-small);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    inline-size: 1em;
+    text-align: end;
+  }
+
+  /* Waiting on someone (in review, blocked): quieter. Done: a green check, the row tinted. */
+  .my-day-row--waiting .my-day-link:not([aria-current="page"]) {
+    color: var(--color-ink-medium);
+  }
+
+  .my-day-link--done:not([aria-current="page"]) {
+    background-color: oklch(var(--lch-green-lightest));
+    color: oklch(var(--lch-green-darkest));
+  }
+
+  .my-day-dot {
+    background-color: var(--color-ink-light);
+    block-size: 0.55em;
+    border-radius: 50%;
+    flex-shrink: 0;
+    inline-size: 0.55em;
+  }
+
+  .my-day-dot--in_progress { background-color: var(--color-link); }
+  .my-day-dot--in_review { background-color: oklch(var(--lch-purple-medium)); }
+  .my-day-dot--blocked { background-color: var(--color-negative); }
+
+  .my-day-check {
+    align-items: center;
+    background-color: oklch(var(--lch-green-medium));
+    block-size: 1.05em;
+    border-radius: 50%;
+    color: var(--color-canvas);
+    display: inline-flex;
+    flex-shrink: 0;
+    inline-size: 1.05em;
+    justify-content: center;
+
+    .icon { --icon-size: 0.7em; }
+  }
+
+  /* When it's due, as a pill: today in the link colour, late in red. */
+  .my-day-due {
+    border-radius: var(--radius-pill, 99rem);
+    color: var(--color-ink-medium);
+    flex-shrink: 0;
+    font-size: var(--text-x-small);
+    padding: 0.1em 0.5em;
+    white-space: nowrap;
+  }
+
+  .my-day-due--today {
+    background-color: color-mix(in oklch, var(--color-link) 12%, transparent);
+    color: var(--color-link);
+    font-weight: 600;
+  }
+
+  .my-day-due--late {
+    background-color: color-mix(in oklch, var(--color-negative) 12%, transparent);
+    color: var(--color-negative);
+    font-weight: 600;
+  }
+
+  /* The nav's filter ("/") hides the rows that don't match: a group with none left goes too. */
+  #my_day .my-day-group:not(:has(.my-day-row:not([hidden]))) {
+    display: none;
+  }
+
+  /* The bulk bar floats at the foot of the list while rows are picked. */
+  .my-day-list .bulk-bar:not([hidden]) {
+    align-items: center;
+    display: flex; /* the core's is display: contents, for the index toolbar's row */
+    gap: 0.3em;
+  }
+
+  .my-day-list .bulk-bar {
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-ink-lighter);
+    border-radius: calc(0.75rem * var(--radius-scale, 1));
+    box-shadow: var(--shadow);
+    inset-block-end: var(--block-space);
+    margin-inline: calc(var(--block-space) * -0.5);
+    padding: var(--block-space-half);
+    position: sticky;
+    z-index: 2;
+  }
+
+  .my-day-list .bulk-bar__actions {
+    flex-wrap: wrap;
+    gap: 0.3em;
+  }
+
+  .my-day-split .my-day-list .bulk-bar :is(.btn, .input) {
+    block-size: 1.9rem;
+    font-size: var(--text-x-small);
+    padding-inline: 0.6em;
+
+    &.input--select {
+      padding-inline-end: 1.8em; /* room for its arrow */
+    }
+  }
+
+  /* The card: a breadcrumb, the title, a row of pill controls, details, priority, notes. */
+  .my-day-card.panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space);
+
+    @media (min-width: 960px) {
+      max-block-size: calc(100dvh - var(--block-space) * 2);
+      overflow-y: auto;
+    }
+  }
+
+  .my-day-card__crumbs {
+    align-items: center;
+    color: var(--color-ink-medium);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4em;
+
+    a {
+      color: inherit;
+      text-decoration: none;
+
+      &:hover { color: var(--color-link); text-decoration: underline; }
+    }
   }
 
   .my-day-card__title {
-    font-size: var(--text-large);
-    font-weight: 650;
-    line-height: 1.25;
+    font-size: var(--text-x-large, 1.6rem);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
     margin: 0;
   }
 
-  .my-day-card__facts {
+  .my-day-card__done {
+    align-items: center;
+    animation: my-day-done 600ms ease-out;
+    background-color: oklch(var(--lch-green-lightest));
+    border-radius: var(--radius-control);
+    color: oklch(var(--lch-green-darkest));
+    display: flex;
+    font-weight: 600;
+    gap: 0.4em;
+    padding: 0.55em 0.8em;
+
+    .icon { color: oklch(var(--lch-green-medium)); }
+  }
+
+  @keyframes my-day-done {
+    0% { opacity: 0; transform: scale(0.96); }
+    60% { opacity: 1; transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+
+  .my-day-card__controls {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
-    gap: var(--inline-space) calc(var(--inline-space) * 2);
+    gap: var(--inline-space-half);
   }
 
-  .my-day-card__description {
-    border-block-start: 1px solid var(--color-ink-lighter);
-    padding-block-start: var(--block-space);
-  }
-
-  /* The status badge is its own dropdown: a status tag with the select laid over it. */
-  .my-day-status__badge {
-    --status-dot: var(--color-ink-light);
-
+  /* A pill: the status, the due date, the people: one look, each changed in place. */
+  .my-day-pill {
     align-items: center;
+    background-color: var(--color-canvas);
     border: 1px solid var(--color-ink-lighter);
     border-radius: var(--radius-pill, 99rem);
-    cursor: pointer;
     display: inline-flex;
-    flex-shrink: 0;
-    font-size: var(--text-x-small);
-    font-weight: 500;
+    font-size: var(--text-small);
     gap: 0.4em;
-    padding-inline: 0.65em 0.4em;
+    min-block-size: 2.1rem;
+    padding-inline: 0.75em;
     position: relative;
-
-    &::before {
-      background-color: var(--status-dot);
-      block-size: 0.5em;
-      border-radius: 50%;
-      content: "";
-      inline-size: 0.5em;
-    }
 
     &:hover,
     &:focus-within {
       border-color: var(--color-ink-light);
+    }
+
+    > .icon {
+      --icon-size: 0.95em;
+
+      color: var(--color-ink-medium);
+    }
+  }
+
+  .my-day-pill--late {
+    border-color: color-mix(in oklch, var(--color-negative) 45%, transparent);
+    color: var(--color-negative);
+
+    > .icon { color: var(--color-negative); }
+  }
+
+  .my-day-pill__date {
+    background: none;
+    border: 0;
+    color: inherit;
+    font: inherit;
+    padding: 0;
+  }
+
+  .my-day-pill--people {
+    padding-inline: 0.3em 0.75em;
+  }
+
+  .my-day-status__badge {
+    --status-dot: var(--color-ink-light);
+
+    cursor: pointer;
+    font-weight: 500;
+    padding-inline: 0.75em 0.5em;
+
+    &::before {
+      background-color: var(--status-dot);
+      block-size: 0.55em;
+      border-radius: 50%;
+      content: "";
+      inline-size: 0.55em;
     }
   }
 
@@ -90,67 +559,65 @@
 
   .my-day-status__select {
     appearance: none;
-    background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23888' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 0.15em center / 0.65em;
+    background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23888' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 0.1em center / 0.65em;
     border: 0;
     color: var(--color-ink);
     cursor: pointer;
     font: inherit;
-    padding: 0.3em 1.1em 0.3em 0;
+    padding: 0.3em 1.2em 0.3em 0;
 
-    &:focus-visible {
-      outline: none;
-    }
+    &:focus-visible { outline: none; }
   }
 
-  /* The facts, each changed in place: the due date (saved on pick) and who's on it. */
-  .my-day-card__due,
-  .my-day-card__people {
-    align-items: center;
-    display: flex;
-    gap: var(--inline-space-half);
-  }
-
-  .my-day-split .my-day-card__date {
-    inline-size: auto;
-  }
-
-  /* The details: read, and click to edit in place (Lexxy), saved with Save. */
+  /* The details: a quiet area to read, which turns into the editor on a click. */
   .my-day-edit {
     > summary {
-      border-radius: calc(0.4em * var(--radius-scale, 1));
+      background-color: var(--color-ink-lightest);
+      border: 1px solid transparent;
+      border-radius: var(--radius-control);
       cursor: text;
       display: flex;
       flex-direction: column;
-      gap: 0.25em;
+      gap: 0.35em;
       list-style: none;
-      margin: -0.4em;
-      padding: 0.4em;
+      min-block-size: 3.5rem;
+      padding: 0.75em 0.9em;
+      position: relative;
 
-      &::-webkit-details-marker {
-        display: none;
-      }
+      &::-webkit-details-marker { display: none; }
 
-      &:hover {
-        background-color: var(--color-ink-lightest);
-      }
+      &:hover { border-color: var(--color-ink-lighter); }
     }
 
-    &[open] > summary {
-      display: none;
-    }
+    &[open] > summary { display: none; }
   }
 
   .my-day-edit__hint {
     align-items: center;
+    color: var(--color-ink-medium);
     display: inline-flex;
     gap: 0.3em;
+    inset-block-start: 0.6em;
+    inset-inline-end: 0.75em;
     opacity: 0;
+    position: absolute;
     transition: opacity 120ms ease;
 
     .my-day-edit > summary:hover &,
     .my-day-edit > summary:focus-visible & {
       opacity: 1;
     }
+  }
+
+  .my-day-edit__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space-half);
+  }
+
+  .my-day-edit__actions {
+    display: flex;
+    justify-content: end;
   }
 
   .my-day-card__footer {
@@ -173,267 +640,9 @@
     margin-inline-start: auto;
   }
 
-  .my-day-tools {
-    align-items: center;
-    display: flex;
-    gap: var(--inline-space-half);
-
-    .my-day-search {
-      flex: 1;
-    }
-  }
-
-  .my-day-search__box {
-    align-items: center;
-    color: var(--color-ink-medium);
-    display: flex;
-    gap: var(--inline-space-half);
-  }
-
-  .my-day-search input {
-    background: none;
-    border: 0;
-    color: var(--color-ink);
-    font: inherit;
-    outline: none;
-  }
-
-  .my-day-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--block-space-half);
-  }
-
-  .my-day-group__header {
-    align-items: center;
-    display: flex;
-    gap: var(--inline-space);
-
-    .divider {
-      flex: 1;
-    }
-  }
-
-  /* A row: its state, its title over where it's from, and when it's due on the right. */
-  .my-day-link .scope-nav__name {
-    align-items: center;
-  }
-
-  .my-day-link__text {
-    display: flex;
-    flex-direction: column;
-    min-inline-size: 0;
-  }
-
-  .my-day-number {
-    flex-shrink: 0;
-    font-variant-numeric: tabular-nums;
-    inline-size: 1.25em;
-    text-align: end;
-  }
-
-  .my-day-dot {
-    background-color: var(--color-ink-light);
-    block-size: 0.55em;
-    border-radius: 50%;
-    flex-shrink: 0;
-    inline-size: 0.55em;
-  }
-
-  .my-day-dot--in_progress { background-color: var(--color-link); }
-  .my-day-dot--in_review { background-color: oklch(var(--lch-purple-medium)); }
-  .my-day-dot--blocked { background-color: var(--color-negative); }
-
-  /* Done: a green check, the row tinted green. */
-  .my-day-check {
-    align-items: center;
-    background-color: oklch(var(--lch-green-medium));
-    block-size: 1.15em;
-    border-radius: 50%;
-    color: var(--color-canvas);
-    display: inline-flex;
-    flex-shrink: 0;
-    inline-size: 1.15em;
-    justify-content: center;
-
-    .icon {
-      --icon-size: 0.75em;
-    }
-  }
-
-  .scope-nav__item.my-day-link--done {
-    background-color: oklch(var(--lch-green-lightest));
-    color: oklch(var(--lch-green-darkest));
-
-    &[aria-current="page"] {
-      background-color: oklch(var(--lch-green-lighter));
-    }
-  }
-
-  .my-day-due {
-    color: var(--color-ink-medium);
-    font-size: var(--text-x-small);
-    white-space: nowrap;
-  }
-
-  .my-day-due--late {
-    color: var(--color-negative);
-    font-weight: 600;
-  }
-
-  /* Priorities: the drop area at the top, unfolding to its work in order. */
-  .my-day-priorities {
-    background-color: var(--color-ink-lightest);
-    border: 1px dashed transparent;
-    border-radius: calc(0.5em * var(--radius-scale, 1));
-    padding: var(--block-space-half) var(--inline-space-half);
-    transition: background-color 120ms ease, border-color 120ms ease;
-
-    &[open] .my-day-priorities__caret {
-      rotate: 0deg;
-    }
-
-    .scope-nav:not(:empty) {
-      margin-block-start: var(--block-space-half);
-    }
-  }
-
-  .my-day-priorities.drag-and-drop__hover-container {
-    background-color: oklch(var(--lch-blue-lightest));
-    border-color: var(--color-link);
-  }
-
-  .my-day-priorities__summary {
-    align-items: center;
-    cursor: pointer;
-    display: flex;
-    gap: 0.5em;
-    list-style: none;
-
-    &::-webkit-details-marker {
-      display: none;
-    }
-
-    strong {
-      flex: 1;
-    }
-  }
-
-  .my-day-priorities__caret {
-    rotate: -90deg;
-    transition: rotate 120ms ease;
-  }
-
-
-  .my-day-priorities__count {
-    color: var(--color-ink-medium);
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* The free places, numbered on from the work: dashed rows the next drop fills. */
-  .my-day-slots {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25em;
-    list-style: none;
-    margin: var(--block-space-half) 0 0;
-    padding: 0;
-  }
-
-  .my-day-slot {
-    align-items: center;
-    border: 1px dashed var(--color-ink-lighter);
-    border-radius: calc(0.4em * var(--radius-scale, 1));
-    display: flex;
-    gap: 0.6em;
-    min-block-size: 2.25rem;
-    padding-inline: 0.5em;
-  }
-
-  /* A row: the box that picks it for the bulk bar, then the link. The box shows on hover, when
-     the row is the keyboard's (j / k), when it's ticked, and on every row once any is picked. */
-  .my-day-row {
-    align-items: center;
-    border-radius: var(--radius-control);
-    cursor: grab;
-    display: flex;
-    gap: 0.25em;
-
-    > .my-day-link {
-      flex: 1;
-      min-inline-size: 0;
-    }
-  }
-
-  /* The core's checkbox (.checkbox: the check drawn in, animated), softened for a list: a light
-     border that darkens on hover, filled with the link colour and a white check once picked. */
-  .my-day-row__check.checkbox {
-    block-size: 1.05rem;
-    border-color: var(--color-ink-light);
-    border-radius: calc(0.3em * var(--radius-scale, 1));
-    color: var(--color-link);
-    cursor: pointer;
-    flex-shrink: 0;
-    inline-size: 1.05rem;
-    margin: 0;
-    opacity: 0;
-    transform: none;
-    transition: opacity 120ms ease, background-color 120ms ease, border-color 120ms ease;
-
-    &::before {
-      background-color: var(--color-canvas);
-      box-shadow: none;
-      block-size: 0.6em;
-      inline-size: 0.6em;
-    }
-
-    &:hover {
-      border-color: var(--color-ink-medium);
-    }
-
-    &:checked {
-      background-color: var(--color-link);
-      border-color: var(--color-link);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--color-link);
-      outline-offset: 2px;
-    }
-
-    .my-day-row:is(:hover, :focus-within, [data-keyboard-current]) &,
-    &:checked,
-    [data-bulk-active] & {
-      opacity: 1;
-    }
-  }
-
-  /* A picked row is tinted, as the core's tables tint theirs. */
-  .my-day-row:has(.my-day-row__check:checked) > .my-day-link {
-    background-color: var(--color-selected-light);
-  }
-
-  /* The nav's filter ("/") hides the rows that don't match: a group with none left goes too, and
-     the priorities' empty places hide while it's filtering, so only the matches remain. */
-  #my_day {
-    .my-day-group:not(:has(.my-day-row:not([hidden]))) {
-      display: none;
-    }
-
-    &:has(.my-day-row[hidden]) .my-day-slots {
-      display: none;
-    }
-  }
-
-  .my-day-split .bulk-bar {
-    margin-block-end: calc(var(--block-space-half) * -1);
-  }
-
-
-  .my-day-owners {
-    align-items: center;
-    display: flex;
-    gap: var(--inline-space-half);
+  .my-day-card__notes {
+    border-block-start: 1px solid var(--color-ink-lighter);
+    padding-block-start: var(--block-space-half);
   }
 
   .my-day-down .icon {
@@ -441,9 +650,10 @@
   }
 
   /* One size for every control on the page: buttons, fields and selects share a height, side
-     padding and text size, so a field and its button line up. Text areas, the drop box and menu
-     entries keep their own. On touch screens fields keep 16px text, so phones don't zoom in. */
-  :is(.my-day-split) {
+     padding and text size, so a field and its button line up. Text areas, the drop box, menu
+     entries and the card's pills keep their own. On touch screens fields keep 16px text, so phones
+     don't zoom in. */
+  .my-day-split {
     --my-day-control-height: 2.25rem;
 
     :is(.btn, input.input, select.input, label.input):not(.input--upload, .popup__btn, textarea) {
@@ -471,7 +681,7 @@
     }
 
     @media (pointer: coarse) {
-      :is(input.input, select.input, label.input input) {
+      :is(input.input, select.input, label.input input, .my-day-pill input, .my-day-pill select) {
         font-size: max(16px, var(--text-small));
       }
     }

@@ -1,97 +1,95 @@
 <%# locals: (day:, todo:) %>
-<%# The piece of work picked on the left: where it's from, its status in one click, its details,
-    and its place in your priorities. Its notes follow in a panel of their own. %>
+<%# The piece of work picked on the left, in one card that stays in view: where it's from, its
+    title, then its status, due date and people as one row of controls (each saving in place), its
+    details (read, click to edit), its place in your priorities and Open in Work, and its notes. %>
 <% priority_todos = day.priority_todos %>
 <% place = priority_todos.index(todo) %>
-<article class="settings__panel panel shadow txt-align-start my-day-card">
-  <header class="my-day-card__header">
-    <p class="txt-x-small txt-subtle margin-none overflow-ellipsis">
-      <%= link_to "#{todo.engagement.ref} #{todo.engagement.title}", todo.engagement, class: "txt-link" %>
-      · <%= link_to todo.client.name, todo.client, class: "txt-link" %>
-    </p>
-    <div class="my-day-card__heading">
-      <h2 class="my-day-card__title"><%= todo.title %></h2>
-      <%= form_with url: my_day_todo_status_path(todo), method: :patch, class: "my-day-status", data: { controller: "form" } do %>
-        <% my_day_return_params.each do |name, value| %>
-          <%# herb:key name %>
-          <input type="hidden" name="<%= name %>" value="<%= value %>">
-        <% end %>
-        <label class="<%= class_names("my-day-status__badge", "my-day-status__badge--#{todo.status}") %>">
-          <span class="for-screen-reader">Status</span>
-          <%= select_tag :status, options_for_select(MyDay::DaysHelper::STATUS_LABELS.invert.to_a, todo.status), class: "my-day-status__select", data: { action: "change->form#submit" } %>
-        </label>
-      <% end %>
-    </div>
-    <div class="my-day-card__facts txt-small">
-      <%= form_with model: todo, url: my_day_todo_path(todo), scope: :todo, method: :patch, class: "my-day-card__due", data: { controller: "form" } do |form| %>
-        <% my_day_return_params.each do |name, value| %>
-          <%# herb:key name %>
-          <input type="hidden" name="<%= name %>" value="<%= value %>">
-        <% end %>
-        <label class="flex align-center gap-half">
-          <span class="txt-subtle">Due</span>
-          <%= date_input form, :due_on, class: "input my-day-card__date", aria: { label: "Due date" }, data: { action: "change->form#submit" } %>
-        </label>
-        <% if todo.due_on && todo.status != "done" && todo.due_on < Date.current %>
-          <span class="my-day-due my-day-due--late">Late</span>
-        <% end %>
-      <% end %>
-      <div class="my-day-card__people">
-        <span class="txt-subtle">People</span>
-        <%= render "todos/owner_picker", todo: todo, labelled: true %>
-      </div>
-    </div>
-  </header>
+<% back = my_day_return_params %>
+<article class="<%= class_names("panel shadow txt-align-start my-day-card", "my-day-card--done": todo.status == "done") %>">
+  <nav class="my-day-card__crumbs txt-x-small" aria-label="Where it's from">
+    <%= link_to todo.client.name, todo.client %>
+    <span aria-hidden="true">›</span>
+    <%= link_to "#{todo.engagement.ref} #{todo.engagement.title}", todo.engagement %>
+  </nav>
 
-  <div class="my-day-card__description">
-    <details class="my-day-edit" <% if todo.description.blank? %>data-empty<% end %>>
-      <summary class="my-day-edit__view">
-        <% if todo.description.present? %>
-          <div class="txt-small"><%= rich_text todo.description %></div>
-        <% else %>
-          <span class="txt-small txt-subtle">Add details…</span>
-        <% end %>
-        <span class="my-day-edit__hint txt-x-small txt-subtle"><%= icon_tag "pencil" %> Edit</span>
-      </summary>
-      <%= form_with model: todo, url: my_day_todo_path(todo), scope: :todo, method: :patch, class: "flex flex-column gap-half", data: { controller: "form" } do |form| %>
-        <% my_day_return_params.each do |name, value| %>
-          <%# herb:key name %>
-          <input type="hidden" name="<%= name %>" value="<%= value %>">
-        <% end %>
-        <%= rich_text_field form, :description, placeholder: "What needs doing, and anything worth knowing. @ to mention someone.", staff: true %>
-        <div class="flex gap-half">
-          <button type="submit" class="btn btn--link">Save</button>
-        </div>
+  <% if todo.status == "done" %>
+    <p class="my-day-card__done txt-small margin-none"><%= icon_tag "check" %> Done<% if todo.completed_at %> <%= time_ago_in_words(todo.completed_at) %> ago<% end %>. Nice work.</p>
+  <% end %>
+
+  <h2 class="my-day-card__title"><%= todo.title %></h2>
+
+  <div class="my-day-card__controls">
+    <%= form_with url: my_day_todo_status_path(todo), method: :patch, class: "my-day-status", data: { controller: "form" } do %>
+      <% back.each do |name, value| %>
+        <%# herb:key name %>
+        <input type="hidden" name="<%= name %>" value="<%= value %>">
       <% end %>
-    </details>
+      <label class="<%= class_names("my-day-pill my-day-status__badge", "my-day-status__badge--#{todo.status}") %>">
+        <span class="for-screen-reader">Status</span>
+        <%= select_tag :status, options_for_select(MyDay::DaysHelper::STATUS_LABELS.invert.to_a, todo.status), class: "my-day-status__select", data: { action: "change->form#submit" } %>
+      </label>
+    <% end %>
+
+    <%= form_with model: todo, url: my_day_todo_path(todo), scope: :todo, method: :patch, class: "my-day-due-form", data: { controller: "form" } do |form| %>
+      <% back.each do |name, value| %>
+        <%# herb:key name %>
+        <input type="hidden" name="<%= name %>" value="<%= value %>">
+      <% end %>
+      <label class="<%= class_names("my-day-pill my-day-pill--date", "my-day-pill--late": todo.due_on && todo.status != "done" && todo.due_on < Date.current) %>">
+        <%= icon_tag "history" %>
+        <span class="for-screen-reader">Due</span>
+        <%= date_input form, :due_on, class: "my-day-pill__date", aria: { label: "Due date" }, data: { action: "change->form#submit" } %>
+      </label>
+    <% end %>
+
+    <div class="my-day-pill my-day-pill--people">
+      <%= render "todos/owner_picker", todo: todo, labelled: true %>
+    </div>
   </div>
+
+  <details class="my-day-edit">
+    <summary class="my-day-edit__view">
+      <% if todo.description.present? %>
+        <div class="txt-small"><%= rich_text todo.description %></div>
+      <% else %>
+        <span class="txt-small txt-subtle">Add details…</span>
+      <% end %>
+      <span class="my-day-edit__hint txt-x-small"><%= icon_tag "pencil" %> Edit</span>
+    </summary>
+    <%= form_with model: todo, url: my_day_todo_path(todo), scope: :todo, method: :patch, class: "my-day-edit__form", data: { controller: "form" } do |form| %>
+      <% back.each do |name, value| %>
+        <%# herb:key name %>
+        <input type="hidden" name="<%= name %>" value="<%= value %>">
+      <% end %>
+      <%= rich_text_field form, :description, placeholder: "What needs doing, and anything worth knowing. @ to mention someone.", staff: true %>
+      <div class="my-day-edit__actions">
+        <button type="submit" class="btn btn--link">Save details</button>
+      </div>
+    <% end %>
+  </details>
 
   <footer class="my-day-card__footer">
     <% if place %>
-      <span class="my-day-card__priority txt-small">
-        <%= icon_tag "pinned" %> Priority <%= place + 1 %> of <%= priority_todos.size %>
-      </span>
+      <span class="my-day-card__priority txt-small"><%= icon_tag "pinned" %> Priority <%= place + 1 %> of <%= priority_todos.size %></span>
       <% if place.positive? %>
-        <%= button_to my_day_priority_path(todo), method: :patch, params: my_day_return_params.merge(direction: "up"),
-              class: "btn btn--circle", title: "Move up" do %>
+        <%= button_to my_day_priority_path(todo), method: :patch, params: back.merge(direction: "up"), class: "btn btn--circle", title: "Move up" do %>
           <%= icon_tag "arrow-up" %> <span class="for-screen-reader">Move up</span>
         <% end %>
       <% end %>
       <% if place < priority_todos.size - 1 %>
-        <%= button_to my_day_priority_path(todo), method: :patch, params: my_day_return_params.merge(direction: "down"),
-              class: "btn btn--circle my-day-down", title: "Move down" do %>
+        <%= button_to my_day_priority_path(todo), method: :patch, params: back.merge(direction: "down"), class: "btn btn--circle my-day-down", title: "Move down" do %>
           <%= icon_tag "arrow-up" %> <span class="for-screen-reader">Move down</span>
         <% end %>
       <% end %>
-      <%= button_to my_day_priority_path(todo), method: :delete, params: my_day_return_params,
-            class: "btn" do %>
+      <%= button_to my_day_priority_path(todo), method: :delete, params: back, class: "btn" do %>
         <%= icon_tag "unpinned" %> <span>Remove</span>
       <% end %>
+    <% elsif todo.status == "done" %>
+      <span class="my-day-card__priority txt-small">Finished work doesn't go in your priorities.</span>
     <% elsif priority_todos.size >= MyDay::Bundle::LIMIT %>
       <span class="my-day-card__priority txt-small"><%= icon_tag "pinned" %> Priorities are full (<%= MyDay::Bundle::LIMIT %>)</span>
     <% else %>
-      <%= button_to my_day_priority_path(todo), method: :post, params: my_day_return_params,
-            class: "btn" do %>
+      <%= button_to my_day_priority_path(todo), method: :post, params: back, class: "btn btn--link" do %>
         <%= icon_tag "pinned" %> <span>Add to priorities</span>
       <% end %>
     <% end %>
@@ -99,8 +97,8 @@
       <span>Open in <%= term(:work) %></span> <%= icon_tag "arrow-right" %>
     <% end %>
   </footer>
-</article>
 
-<div class="settings__panel panel shadow txt-align-start my-day-notes">
-  <%= render "notes/section", subject: todo, permanent: false %>
-</div>
+  <div class="my-day-card__notes">
+    <%= render "notes/section", subject: todo, permanent: false %>
+  </div>
+</article>
