@@ -1,0 +1,134 @@
+<%# locals: (day:, todo:, from_bundle:, next_todo:) %>
+<%# The piece of work picked on the left: where it's from, its status to move on in one click (Done
+    and next opens what comes after it), its details, and the bundles it's pinned in. %>
+<% bundles = day.bundles_for(todo) %>
+<% bundle_todos = from_bundle ? from_bundle.todos_from(day.pinned_todos) : [] %>
+<div class="flex flex-column gap">
+  <div class="flex flex-column gap-half">
+    <p class="txt-x-small txt-subtle margin-none">
+      <% if from_bundle %>
+        <%= icon_tag "pinned" %> <%= from_bundle.name %> · <%= bundle_todos.index(todo).to_i + 1 %> of <%= bundle_todos.size %>
+      <% else %>
+        <%= link_to todo.engagement.ref, todo.engagement, class: "txt-link", data: { turbo_frame: "_top" } %> · <%= link_to todo.client.name, todo.client, class: "txt-link", data: { turbo_frame: "_top" } %>
+      <% end %>
+    </p>
+    <div class="my-day-detail__heading">
+      <h2 class="my-day-detail__title"><%= todo.title %></h2>
+      <%= status_tag my_day_status_label(todo) %>
+    </div>
+    <div class="record-meta txt-small">
+      <% if from_bundle %>
+        <%= link_to "#{todo.engagement.ref} #{todo.engagement.title}", todo.engagement, class: "txt-link", data: { turbo_frame: "_top" } %>
+        <%= link_to todo.client.name, todo.client, class: "txt-link", data: { turbo_frame: "_top" } %>
+      <% else %>
+        <span><%= todo.engagement.title %></span>
+      <% end %>
+      <% if todo.due_on %>
+        <span>Due <%= my_day_due todo %></span>
+      <% end %>
+      <span class="my-day-owners">
+        <% todo.owners.each do |owner| %>
+          <%# herb:key owner.id %>
+          <%= person_tag owner %>
+        <% end %>
+      </span>
+    </div>
+  </div>
+
+  <div class="flex flex-column gap-half">
+    <span class="record-form__label">Status</span>
+    <div class="my-day-statuses">
+      <% MyDay::DaysHelper::STATUS_LABELS.each do |status, label| %>
+        <%# herb:key status %>
+        <%= button_to label, my_day_todo_status_path(todo), method: :patch, params: my_day_return_params.merge(status: status),
+              class: "btn txt-small", form: { data: { turbo_frame: "my_day" } }, aria: { pressed: todo.status == status } %>
+      <% end %>
+    </div>
+    <div class="my-day-next">
+      <% if todo.status != "done" %>
+        <% if next_todo %>
+          <%= button_to my_day_todo_status_path(todo), method: :patch, params: my_day_return_params.merge(status: "done", next: next_todo.id),
+                class: "btn btn--link", form: { data: { turbo_frame: "my_day" } } do %>
+            <%= icon_tag "check" %> <span>Done, and next: <%= next_todo.title.truncate(40) %></span>
+          <% end %>
+        <% else %>
+          <%= button_to my_day_todo_status_path(todo), method: :patch, params: my_day_return_params.merge(status: "done"),
+                class: "btn btn--link", form: { data: { turbo_frame: "my_day" } } do %>
+            <%= icon_tag "check" %> <span>Done</span>
+          <% end %>
+        <% end %>
+      <% end %>
+      <% if next_todo %>
+        <%= link_to my_day_todo_path(next_todo, bundle: from_bundle), class: "btn txt-small", data: { turbo_frame: "my_day", turbo_action: "advance" } do %>
+          <span>Skip to next</span> <%= icon_tag "arrow-right" %>
+        <% end %>
+      <% elsif from_bundle %>
+        <span class="txt-small txt-subtle">The last in <%= from_bundle.name %>.</span>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="flex flex-column gap-half">
+    <span class="record-form__label">Details</span>
+    <% if todo.description.present? %>
+      <div class="txt-small"><%= rich_text todo.description %></div>
+    <% else %>
+      <p class="txt-small txt-subtle margin-none">No details.</p>
+    <% end %>
+    <div>
+      <%= link_to todo, class: "btn txt-small", data: { turbo_frame: "_top" } do %>
+        <span>Open in <%= term(:work) %></span> <%= icon_tag "arrow-right" %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="flex flex-column gap-half">
+    <span class="record-form__label">Pinned in</span>
+    <% if bundles.any? %>
+      <ul class="my-day-pins">
+        <% bundles.each do |bundle| %>
+          <%# herb:key bundle.id %>
+          <% list = bundle.todos_from(day.pinned_todos) %>
+          <% place = list.index(todo).to_i %>
+          <li class="my-day-pin">
+            <%= link_to my_day_todo_path(todo, bundle: bundle), class: "txt-link overflow-ellipsis", data: { turbo_frame: "my_day", turbo_action: "advance" } do %>
+              <%= bundle.name %> · <%= place + 1 %> of <%= list.size %>
+            <% end %>
+            <span class="my-day-pin__actions">
+              <%= button_to my_day_bundle_pin_path(bundle, todo), method: :patch, params: my_day_return_params(bundle: bundle).merge(direction: "up"),
+                    class: "btn btn--circle txt-small", title: "Move up", disabled: place.zero?, form: { data: { turbo_frame: "my_day" } } do %>
+                <%= icon_tag "arrow-up" %> <span class="for-screen-reader">Move up</span>
+              <% end %>
+              <%= button_to my_day_bundle_pin_path(bundle, todo), method: :patch, params: my_day_return_params(bundle: bundle).merge(direction: "down"),
+                    class: "btn btn--circle txt-small my-day-down", title: "Move down", disabled: place == list.size - 1, form: { data: { turbo_frame: "my_day" } } do %>
+                <%= icon_tag "arrow-up" %> <span class="for-screen-reader">Move down</span>
+              <% end %>
+              <%= button_to my_day_bundle_pin_path(bundle, todo), method: :delete, params: my_day_return_params(bundle: nil),
+                    class: "btn txt-small", form: { data: { turbo_frame: "my_day" } } do %>
+                <%= icon_tag "unpinned" %> <span>Unpin</span>
+              <% end %>
+            </span>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="txt-small txt-subtle margin-none">Not in a bundle. Pin it to keep it at the top of your day.</p>
+    <% end %>
+
+    <% others = day.bundles - bundles %>
+    <% if others.any? %>
+      <%= form_with url: my_day_pins_path, method: :post, class: "my-day-form-row", data: { turbo_frame: "my_day" } do %>
+        <%= my_day_return_fields(bundle: nil) %>
+        <%= hidden_field_tag :todo_id, todo.id, id: nil %>
+        <%= select_tag :bundle_id, options_from_collection_for_select(others, :id, :name), class: "input input--select txt-small", aria: { label: "Bundle" } %>
+        <button type="submit" class="btn txt-small"><%= icon_tag "pinned" %> <span>Pin</span></button>
+      <% end %>
+    <% end %>
+    <%= form_with url: my_day_bundles_path, scope: :bundle, class: "my-day-form-row", data: { turbo_frame: "my_day" } do |form| %>
+      <%= my_day_return_fields %>
+      <%= hidden_field_tag :todo_id, todo.id, id: nil %>
+      <%= form.text_field :name, class: "input txt-small", required: true, maxlength: 80, placeholder: "A new bundle, e.g. Before lunch", aria: { label: "New bundle" } %>
+      <button type="submit" class="btn txt-small"><%= icon_tag "add" %> <span>Pin to a new bundle</span></button>
+    <% end %>
+  </div>
+</div>

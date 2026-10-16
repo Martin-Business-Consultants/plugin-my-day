@@ -1,0 +1,17 @@
+<%# locals: (todo:, bundle:, current:, number: nil) %>
+<%# One piece of work in the list or a bundle: its state, its title, where it's from and when it's
+    due. Picking it opens it on the right; from a bundle, Next then follows the bundle. %>
+<%= link_to my_day_todo_path(todo, bundle: bundle), class: class_names("scope-nav__item my-day-link", "my-day-link--done": todo.status == "done"),
+      aria: { current: ("page" if current) }, data: { turbo_frame: "my_day", turbo_action: "advance", filter_target: "item" } do %>
+  <span class="scope-nav__name">
+    <% if number %>
+      <span class="my-day-number txt-x-small txt-subtle"><%= number %></span>
+    <% end %>
+    <%= my_day_marker todo %>
+    <span class="my-day-link__text">
+      <span class="overflow-ellipsis" title="<%= todo.title %>"><%= todo.title %></span>
+      <span class="txt-x-small txt-subtle overflow-ellipsis"><%= todo.engagement.ref %> · <%= todo.client.name %></span>
+    </span>
+  </span>
+  <span class="scope-nav__count"><%= my_day_due todo %></span>
+<% end %>

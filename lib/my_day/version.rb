@@ -1,0 +1,3 @@
+module MyDay
+  VERSION = "0.1.0"
+end
