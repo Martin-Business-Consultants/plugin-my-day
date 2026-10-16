@@ -42,8 +42,10 @@ Read first, in Runwell's repository:
   `Pin`s (`todo_id`, `position`), five at most (`LIMIT`): `place(todo, before:)` adds or moves
   (false for a sixth), `move(todo, :up / :down)`, `unpin`. A todo gone from the core is skipped
   (`todos_from`), never an error.
-- Status changes go through the core's verb (`todo.update(status:)`), so the todo's history
-  records them as anywhere else.
+- The card changes the todo in place through the core's model: status (`StatusesController`, a
+  select styled as the badge), due date and details (`TodosController`), each saving and landing
+  back on the day; who's on it is the core's `todos/owner_picker`, which answers in place. The
+  todo's history, mentions and search follow as anywhere else.
 - The page is one page, reloaded in place: links and forms land back on `/my-day` with the same
   filter, search and todo, which Turbo morphs with the scroll kept (the core's
   `turbo_refreshes_with`). Not a turbo frame: Lexxy's editor (the notes) doesn't come back to
@@ -54,3 +56,8 @@ Read first, in Runwell's repository:
   `priorities/:todo_id/removal`. Their answer is a turbo stream refresh without a request id (so
   Turbo doesn't skip it as its own echo); a session flag keeps the priorities unfolded after a
   change.
+- Each row is a keyboard item (`data-filter-target="item"`, so the core's `j` / `k`, Enter and `x`
+  work) holding a bulk checkbox (`data-keys="x"`) and the link. The bulk bar is the core's
+  (`BulkHelper`, the `bulk` controller on `<main>`): status, due date and lead go to the core's
+  `bulk_todos_path`; priorities to `BulkPrioritiesController`. The open-a-todo link helper is
+  `my_day_open_path`: `my_day_todo_path` is the update route's.

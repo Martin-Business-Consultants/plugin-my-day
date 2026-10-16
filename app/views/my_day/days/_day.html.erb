@@ -32,6 +32,17 @@
         <%= render "layouts/shared/quick_filter", title: "Show…", param: :show, current: day.show, options: MyDay::Day::SHOWS.invert.to_a %>
       </div>
 
+      <%# Picked rows (x on the row you're on, or its box), acted on together: the core's bulk bar,
+          its work actions (Bulk::TodosController) and the priorities' own. %>
+      <% keep = my_day_return_params.merge(todo: todo&.id).compact_blank %>
+      <%= bulk_bar do %>
+        <%= bulk_button my_day_bulk_priorities_path, method: :post, label: "Add to priorities", params: keep %>
+        <%= bulk_button my_day_bulk_priorities_path, method: :delete, label: "Take off priorities", params: keep %>
+        <%= bulk_menu bulk_todos_path, method: :patch, name: "todo[status]", label: "Status", choices: MyDay::DaysHelper::STATUS_LABELS.invert.to_a %>
+        <%= bulk_date bulk_todos_path, method: :patch, name: "todo[due_on]", label: "Due date" %>
+        <%= bulk_menu bulk_todos_path, method: :patch, name: "todo[owner_id]", label: "Lead", choices: [ [ "Me", "me" ] ] + User.active.people.ordered.map { [ it.display_name, it.id ] } %>
+      <% end %>
+
       <details class="<%= class_names("my-day-priorities", "my-day-priorities--empty": priority_todos.empty?) %>" <% if open || priority_todos.include?(todo) || priority_todos.empty? %>open<% end %>
                data-drag-and-drop-target="container" data-drag-and-drop-sortable="true"
                data-drag-and-drop-url="<%= my_day_priority_path("__id__", **back) %>">

@@ -25,14 +25,28 @@ module MyDay
     # Puts a todo just before another (a todo id), or at the end: added if it wasn't here, moved
     # if it was. Five at most: a sixth isn't added (false).
     def place(todo, before: nil)
-      list = pins.to_a
+      list = pins.to_a.dup
       return false if full? && !include?(todo)
 
-      pin = list.find { it.todo_id == todo.id } || pins.build(todo_id: todo.id)
+      pin = list.find { it.todo_id == todo.id } || Pin.new(bundle: self, todo_id: todo.id)
       list.delete(pin)
       at = list.index { it.todo_id.to_s == before.to_s } if before.present?
       list.insert(at || list.size, pin)
       renumber(list)
+    end
+
+    # Several at the end, in order, as far as they hold; returns those that didn't fit. One read and
+    # one renumbering for all of them (the bulk bar).
+    def add(todos)
+      list = pins.to_a.dup
+      skipped = todos.select do |todo|
+        next true if list.size >= LIMIT && list.none? { it.todo_id == todo.id }
+
+        list << Pin.new(bundle: self, todo_id: todo.id) if list.none? { it.todo_id == todo.id }
+        false
+      end
+      renumber(list)
+      skipped
     end
 
     def unpin(todo) = pins.where(todo_id: todo.id).delete_all

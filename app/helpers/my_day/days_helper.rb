@@ -4,7 +4,7 @@ module MyDay
                       "blocked" => "Blocked", "done" => "Done" }.freeze
 
     # A link to the day with this todo open, keeping the filter and search.
-    def my_day_todo_path(todo)
+    def my_day_open_path(todo)
       my_day_day_path({ todo: todo.id, show: params[:show], q: params[:q] }.compact_blank)
     end
 

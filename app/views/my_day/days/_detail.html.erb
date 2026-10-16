@@ -11,34 +11,60 @@
     </p>
     <div class="my-day-card__heading">
       <h2 class="my-day-card__title"><%= todo.title %></h2>
-      <%= status_tag my_day_status_label(todo) %>
-    </div>
-    <div class="my-day-card__facts txt-small txt-subtle">
-      <% if todo.due_on %>
-        <span>Due <%= my_day_due todo %></span>
-      <% else %>
-        <span>No due date</span>
-      <% end %>
-      <span class="my-day-owners">
-        <% todo.owners.each do |owner| %>
-          <%# herb:key owner.id %>
-          <%= person_tag owner %>
+      <%= form_with url: my_day_todo_status_path(todo), method: :patch, class: "my-day-status", data: { controller: "form" } do %>
+        <% my_day_return_params.each do |name, value| %>
+          <%# herb:key name %>
+          <input type="hidden" name="<%= name %>" value="<%= value %>">
         <% end %>
-      </span>
+        <label class="<%= class_names("my-day-status__badge", "my-day-status__badge--#{todo.status}") %>">
+          <span class="for-screen-reader">Status</span>
+          <%= select_tag :status, options_for_select(MyDay::DaysHelper::STATUS_LABELS.invert.to_a, todo.status), class: "my-day-status__select", data: { action: "change->form#submit" } %>
+        </label>
+      <% end %>
+    </div>
+    <div class="my-day-card__facts txt-small">
+      <%= form_with model: todo, url: my_day_todo_path(todo), scope: :todo, method: :patch, class: "my-day-card__due", data: { controller: "form" } do |form| %>
+        <% my_day_return_params.each do |name, value| %>
+          <%# herb:key name %>
+          <input type="hidden" name="<%= name %>" value="<%= value %>">
+        <% end %>
+        <label class="flex align-center gap-half">
+          <span class="txt-subtle">Due</span>
+          <%= date_input form, :due_on, class: "input my-day-card__date", aria: { label: "Due date" }, data: { action: "change->form#submit" } %>
+        </label>
+        <% if todo.due_on && todo.status != "done" && todo.due_on < Date.current %>
+          <span class="my-day-due my-day-due--late">Late</span>
+        <% end %>
+      <% end %>
+      <div class="my-day-card__people">
+        <span class="txt-subtle">People</span>
+        <%= render "todos/owner_picker", todo: todo, labelled: true %>
+      </div>
     </div>
   </header>
 
-  <div class="my-day-statuses" role="group" aria-label="Status">
-    <% MyDay::DaysHelper::STATUS_LABELS.each do |status, label| %>
-      <%# herb:key status %>
-      <%= button_to label, my_day_todo_status_path(todo), method: :patch, params: my_day_return_params.merge(status: status),
-            class: "btn", aria: { pressed: todo.status == status } %>
-    <% end %>
+  <div class="my-day-card__description">
+    <details class="my-day-edit" <% if todo.description.blank? %>data-empty<% end %>>
+      <summary class="my-day-edit__view">
+        <% if todo.description.present? %>
+          <div class="txt-small"><%= rich_text todo.description %></div>
+        <% else %>
+          <span class="txt-small txt-subtle">Add details…</span>
+        <% end %>
+        <span class="my-day-edit__hint txt-x-small txt-subtle"><%= icon_tag "pencil" %> Edit</span>
+      </summary>
+      <%= form_with model: todo, url: my_day_todo_path(todo), scope: :todo, method: :patch, class: "flex flex-column gap-half", data: { controller: "form" } do |form| %>
+        <% my_day_return_params.each do |name, value| %>
+          <%# herb:key name %>
+          <input type="hidden" name="<%= name %>" value="<%= value %>">
+        <% end %>
+        <%= rich_text_field form, :description, placeholder: "What needs doing, and anything worth knowing. @ to mention someone.", staff: true %>
+        <div class="flex gap-half">
+          <button type="submit" class="btn btn--link">Save</button>
+        </div>
+      <% end %>
+    </details>
   </div>
-
-  <% if todo.description.present? %>
-    <div class="my-day-card__description txt-small"><%= rich_text todo.description %></div>
-  <% end %>
 
   <footer class="my-day-card__footer">
     <% if place %>

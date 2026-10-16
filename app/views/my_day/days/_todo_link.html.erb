@@ -1,18 +1,23 @@
 <%# locals: (todo:, current:, number: nil) %>
-<%# One piece of work in the list or the priorities: its state, its title, where it's from and when
-    it's due. Click to open it on the right; drag it onto Priorities (or back off them). %>
-<%= link_to my_day_todo_path(todo), class: class_names("scope-nav__item my-day-link", "my-day-link--done": todo.status == "done"),
-      draggable: true, aria: { current: ("page" if current) },
-      data: { id: todo.id, drag_and_drop_target: "item", turbo_action: "replace", filter_target: "item" } do %>
-  <span class="scope-nav__name">
-    <% if number %>
-      <span class="my-day-number txt-x-small txt-subtle"><%= number %></span>
-    <% end %>
-    <%= my_day_marker todo %>
-    <span class="my-day-link__text">
-      <span class="overflow-ellipsis" title="<%= todo.title %>"><%= todo.title %></span>
-      <span class="txt-x-small txt-subtle overflow-ellipsis"><%= todo.engagement.ref %> · <%= todo.client.name %></span>
+<%# One piece of work in the list or the priorities: a box to pick it for the bulk bar (x), its
+    state, its title, where it's from and when it's due. j / k move through the rows (the core's
+    keyboard controller), Enter or o opens one on the right; drag it onto Priorities (or back off). %>
+<div class="<%= class_names("my-day-row", "my-day-row--done": todo.status == "done") %>" draggable="true"
+     data-id="<%= todo.id %>" data-drag-and-drop-target="item" data-filter-target="item">
+  <input type="checkbox" class="my-day-row__check" value="<%= todo.id %>" aria-label="Pick <%= todo.title %>"
+         data-bulk-target="item" data-action="bulk#update" data-keys="x">
+  <%= link_to my_day_open_path(todo), class: class_names("scope-nav__item my-day-link", "my-day-link--done": todo.status == "done"),
+        draggable: false, aria: { current: ("page" if current) }, data: { turbo_action: "replace" } do %>
+    <span class="scope-nav__name">
+      <% if number %>
+        <span class="my-day-number txt-x-small txt-subtle"><%= number %></span>
+      <% end %>
+      <%= my_day_marker todo %>
+      <span class="my-day-link__text">
+        <span class="overflow-ellipsis" title="<%= todo.title %>"><%= todo.title %></span>
+        <span class="txt-x-small txt-subtle overflow-ellipsis"><%= todo.engagement.ref %> · <%= todo.client.name %></span>
+      </span>
     </span>
-  </span>
-  <span class="scope-nav__count"><%= my_day_due todo %></span>
-<% end %>
+    <span class="scope-nav__count"><%= my_day_due todo %></span>
+  <% end %>
+</div>

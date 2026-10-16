@@ -45,12 +45,112 @@
     align-items: center;
     display: flex;
     flex-wrap: wrap;
-    gap: var(--inline-space);
+    gap: var(--inline-space) calc(var(--inline-space) * 2);
   }
 
   .my-day-card__description {
     border-block-start: 1px solid var(--color-ink-lighter);
     padding-block-start: var(--block-space);
+  }
+
+  /* The status badge is its own dropdown: a status tag with the select laid over it. */
+  .my-day-status__badge {
+    --status-dot: var(--color-ink-light);
+
+    align-items: center;
+    border: 1px solid var(--color-ink-lighter);
+    border-radius: var(--radius-pill, 99rem);
+    cursor: pointer;
+    display: inline-flex;
+    flex-shrink: 0;
+    font-size: var(--text-x-small);
+    font-weight: 500;
+    gap: 0.4em;
+    padding-inline: 0.65em 0.4em;
+    position: relative;
+
+    &::before {
+      background-color: var(--status-dot);
+      block-size: 0.5em;
+      border-radius: 50%;
+      content: "";
+      inline-size: 0.5em;
+    }
+
+    &:hover,
+    &:focus-within {
+      border-color: var(--color-ink-light);
+    }
+  }
+
+  .my-day-status__badge--in_progress { --status-dot: var(--color-link); }
+  .my-day-status__badge--in_review { --status-dot: oklch(var(--lch-purple-medium)); }
+  .my-day-status__badge--blocked { --status-dot: var(--color-negative); }
+  .my-day-status__badge--done { --status-dot: oklch(var(--lch-green-medium)); }
+
+  .my-day-status__select {
+    appearance: none;
+    background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23888' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 0.15em center / 0.65em;
+    border: 0;
+    color: var(--color-ink);
+    cursor: pointer;
+    font: inherit;
+    padding: 0.3em 1.1em 0.3em 0;
+
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
+  /* The facts, each changed in place: the due date (saved on pick) and who's on it. */
+  .my-day-card__due,
+  .my-day-card__people {
+    align-items: center;
+    display: flex;
+    gap: var(--inline-space-half);
+  }
+
+  .my-day-split .my-day-card__date {
+    inline-size: auto;
+  }
+
+  /* The details: read, and click to edit in place (Lexxy), saved with Save. */
+  .my-day-edit {
+    > summary {
+      border-radius: calc(0.4em * var(--radius-scale, 1));
+      cursor: text;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25em;
+      list-style: none;
+      margin: -0.4em;
+      padding: 0.4em;
+
+      &::-webkit-details-marker {
+        display: none;
+      }
+
+      &:hover {
+        background-color: var(--color-ink-lightest);
+      }
+    }
+
+    &[open] > summary {
+      display: none;
+    }
+  }
+
+  .my-day-edit__hint {
+    align-items: center;
+    display: inline-flex;
+    gap: 0.3em;
+    opacity: 0;
+    transition: opacity 120ms ease;
+
+    .my-day-edit > summary:hover &,
+    .my-day-edit > summary:focus-visible & {
+      opacity: 1;
+    }
   }
 
   .my-day-card__footer {
@@ -248,25 +348,39 @@
     padding-inline: 0.5em;
   }
 
-  .my-day-link[draggable="true"] {
+  /* A row: the box that picks it for the bulk bar, then the link. The box shows on hover, when
+     the row is the keyboard's (j / k), when it's ticked, and on every row once any is picked. */
+  .my-day-row {
+    align-items: center;
+    border-radius: var(--radius-control);
     cursor: grab;
-  }
-
-  /* The status, one click away: a row of buttons, the current one filled. */
-  .my-day-statuses {
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--inline-space-half);
+    gap: 0.25em;
 
-    form {
-      display: contents;
+    > .my-day-link {
+      flex: 1;
+      min-inline-size: 0;
     }
   }
 
-  .my-day-statuses .btn[aria-pressed="true"] {
-    background-color: var(--color-ink);
-    color: var(--color-canvas);
+  .my-day-row__check {
+    accent-color: var(--color-ink);
+    flex-shrink: 0;
+    margin: 0;
+    opacity: 0;
+    transition: opacity 120ms ease;
+
+    .my-day-row:is(:hover, :focus-within, [data-keyboard-current]) &,
+    &:checked,
+    [data-bulk-active] & {
+      opacity: 1;
+    }
   }
+
+  .my-day-split .bulk-bar {
+    margin-block-end: calc(var(--block-space-half) * -1);
+  }
+
 
   .my-day-owners {
     align-items: center;
@@ -296,10 +410,16 @@
       padding-inline: 0.75em;
     }
 
+    /* Round buttons keep the core's grid (the icon sized from the button): only their size. */
     .btn.btn--circle {
-      inline-size: var(--my-day-control-height);
-      justify-content: center;
+      --btn-size: var(--my-day-control-height);
+
       padding-inline: 0;
+    }
+
+    /* The bulk bar's pills keep their own width beside each other. */
+    .bulk-bar .input {
+      inline-size: auto;
     }
 
     @media (pointer: coarse) {
