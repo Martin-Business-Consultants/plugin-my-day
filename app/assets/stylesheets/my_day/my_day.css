@@ -363,18 +363,52 @@
     }
   }
 
-  .my-day-row__check {
-    accent-color: var(--color-ink);
+  /* The core's checkbox (.checkbox: the check drawn in, animated), softened for a list: a light
+     border that darkens on hover, filled with the link colour and a white check once picked. */
+  .my-day-row__check.checkbox {
+    block-size: 1.05rem;
+    border-color: var(--color-ink-light);
+    border-radius: calc(0.3em * var(--radius-scale, 1));
+    color: var(--color-link);
+    cursor: pointer;
     flex-shrink: 0;
+    inline-size: 1.05rem;
     margin: 0;
     opacity: 0;
-    transition: opacity 120ms ease;
+    transform: none;
+    transition: opacity 120ms ease, background-color 120ms ease, border-color 120ms ease;
+
+    &::before {
+      background-color: var(--color-canvas);
+      box-shadow: none;
+      block-size: 0.6em;
+      inline-size: 0.6em;
+    }
+
+    &:hover {
+      border-color: var(--color-ink-medium);
+    }
+
+    &:checked {
+      background-color: var(--color-link);
+      border-color: var(--color-link);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-link);
+      outline-offset: 2px;
+    }
 
     .my-day-row:is(:hover, :focus-within, [data-keyboard-current]) &,
     &:checked,
     [data-bulk-active] & {
       opacity: 1;
     }
+  }
+
+  /* A picked row is tinted, as the core's tables tint theirs. */
+  .my-day-row:has(.my-day-row__check:checked) > .my-day-link {
+    background-color: var(--color-selected-light);
   }
 
   .my-day-split .bulk-bar {

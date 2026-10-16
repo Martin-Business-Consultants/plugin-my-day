@@ -19,10 +19,10 @@ Then switch it on in Settings › Plugins.
 
 - **My day**, in the nav: two columns, half and half.
 - **On the left, your work**: everything you lead or are on, grouped by when it's due (late,
-  today, this week, later, no date), oldest first in each, each with its state, where it's from
-  and when it's due (late ones in red). A search box above it (as you type: the title, its
-  engagement or its client) and a filter: everything open, due today or late, due this week, done
-  this week, or everything.
+  today, this week, later, no date; work in review or blocked sits in its own groups at the
+  bottom), oldest first in each, each with its state, where it's from and when it's due (late ones
+  in red). A search box above it (as you type: the title, its engagement or its client) and a
+  filter: everything open, due today or late, due this week, done this week, or everything.
 - **Vim keys and bulk actions**: `j` / `k` move through the list (`gg` and `G` to the first and
   last), Enter or `o` opens the one you're on, and `x` picks it (or tick its box). With any picked,
   a bar above the list adds them to your priorities or takes them off, and sets their status, due

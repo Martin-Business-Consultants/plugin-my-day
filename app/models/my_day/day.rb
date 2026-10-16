@@ -1,11 +1,14 @@
 module MyDay
   # A person's day: the open work they lead or are on, found by search and narrowed by when it's
-  # due, in groups to work down (late, today, this week, later, no date), oldest first in each,
-  # and their priorities.
+  # due, in groups to work down (late, today, this week, later, no date, then what's in review or
+  # blocked), oldest first in each, and their priorities.
   class Day
     SHOWS = { "open" => "Everything open", "today" => "Due today or late", "week" => "Due this week",
               "done" => "Done this week", "all" => "Everything" }.freeze
     Group = Data.define(:key, :title, :todos)
+    # Work waiting on someone else (a check, or whatever blocks it) goes to the bottom, in groups of
+    # its own, below the work to do now.
+    WAITING = %w[in_review blocked].freeze
 
     attr_reader :user, :show, :query
 
@@ -29,6 +32,7 @@ module MyDay
       week = today + 7
       buckets = todos.group_by do |todo|
         if todo.status == "done" then "done"
+        elsif todo.status.in?(WAITING) then todo.status
         elsif todo.due_on.nil? then "undated"
         elsif todo.due_on < today then "late"
         elsif todo.due_on == today then "today"
@@ -36,7 +40,8 @@ module MyDay
         else "later"
         end
       end
-      { "late" => "Late", "today" => "Today", "week" => "This week", "later" => "Later", "undated" => "No date", "done" => "Done" }
+      { "late" => "Late", "today" => "Today", "week" => "This week", "later" => "Later", "undated" => "No date",
+        "in_review" => "In review", "blocked" => "Blocked", "done" => "Done" }
         .filter_map { |key, title| Group.new(key: key, title: title, todos: buckets[key]) if buckets[key] }
     end
 
@@ -60,7 +65,10 @@ module MyDay
       pinned_todos[id.to_i] || todos.find { it.id == id.to_i } || Todo.assigned_to(user).includes(engagement: :client).find_by(id: id)
     end
 
-    def first = priority_todos.find { it.status != "done" } || todos.find { it.status != "done" } || todos.first
+    def first
+      listed = groups.flat_map(&:todos)
+      priority_todos.find { it.status != "done" } || listed.find { !it.status.in?([ "done", *WAITING ]) } || listed.first
+    end
 
     private
       def filtered(scope)

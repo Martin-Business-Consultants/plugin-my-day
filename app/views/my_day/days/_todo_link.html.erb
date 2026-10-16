@@ -4,7 +4,7 @@
     keyboard controller), Enter or o opens one on the right; drag it onto Priorities (or back off). %>
 <div class="<%= class_names("my-day-row", "my-day-row--done": todo.status == "done") %>" draggable="true"
      data-id="<%= todo.id %>" data-drag-and-drop-target="item" data-filter-target="item">
-  <input type="checkbox" class="my-day-row__check" value="<%= todo.id %>" aria-label="Pick <%= todo.title %>"
+  <input type="checkbox" class="checkbox my-day-row__check" value="<%= todo.id %>" aria-label="Pick <%= todo.title %>"
          data-bulk-target="item" data-action="bulk#update" data-keys="x">
   <%= link_to my_day_open_path(todo), class: class_names("scope-nav__item my-day-link", "my-day-link--done": todo.status == "done"),
         draggable: false, aria: { current: ("page" if current) }, data: { turbo_action: "replace" } do %>
