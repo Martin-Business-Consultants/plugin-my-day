@@ -5,7 +5,7 @@ the day.
 
 A Runwell plugin (Runwell's `docs/plugins.md`): a Rails engine that owns its `my_day_*` tables,
 points at people and work by id, and extends the core only through the plugin contract. Needs
-Runwell 2.24 or newer (2.25 for its sun in the nav).
+Runwell 2.25.2 or newer.
 
 ## Install
 
@@ -22,25 +22,20 @@ Then switch it on in Settings › Plugins.
   today, this week, later, no date), each with its state, where it's from and when it's due (late
   ones in red). A search box above it (as you type: the title, its engagement or its client) and a
   filter: everything open, due today or late, due this week, done this week, or everything.
-- **Bundles, pinned at the top**: named groups of work in the order you mean to do them ("Before
-  lunch", "Acme launch"). Click a bundle and it unfolds with its work numbered in that order and
-  how much of it is done; finished work turns green. Rename or delete a bundle from inside it
-  (deleting one only unpins its work). Bundles are yours alone.
-- **On the right, the piece you picked**: its engagement and client, due date and who's on it, its
-  status in one click (planned, in progress, in review, blocked, done), its details, and Open in
-  Work for everything else.
-- **Working through the day**: Done, and next marks it done and opens what comes after it: the
-  next in the bundle you opened it from, else the next in your list. Skip to next moves on
-  without changing it.
-- **Pinning**: pin the piece on the right to one of your bundles (at the bottom) or to a new one,
-  move it up or down its bundle, or unpin it.
+- **Priorities, at the top**: a drop area that gathers the day's priorities. Drag work onto it
+  (in the order you'll do it, or drag within it to reorder), and drag it back onto the list to
+  take it off. Click it to unfold its work, numbered, with how much is done; finished work turns
+  green. Your priorities are yours alone.
+- **On the right, the piece you picked**: a card with its engagement and client, due date and
+  who's on it, its status in one click (planned, in progress, in review, blocked, done), its
+  details, its place in your priorities (add, move up or down, remove: the same without dragging)
+  and Open in Work; under it, its notes, with the composer to add one.
 
 ## Agents
 
-`show_my_day` (with `show`, `q` and `todo`), `create_my_day_bundle`, `rename_my_day_bundle`,
-`delete_my_day_bundle`, `pin_to_my_day_bundle`, `move_in_my_day_bundle`,
-`unpin_from_my_day_bundle` and `set_my_day_status`. "Working through someone's day" is offered to
-agents as a workflow. An agent's bundles are its person's.
+`show_my_day` (with `show`, `q` and `todo`), `add_my_day_priority` (with `before`),
+`move_my_day_priority`, `remove_my_day_priority` and `set_my_day_status`. "Working through
+someone's day" is offered to agents as a workflow. An agent's priorities are its person's.
 
 ## Developing
 

@@ -34,17 +34,22 @@ Read first, in Runwell's repository:
 
 ## This plugin
 
-- `MyDay::Day` is the page's query: the person's work (`Todo.assigned_to`, through `Current.user.person`,
-  so an agent's day is its person's), filtered (`SHOWS`) and searched (title, engagement, client),
-  in groups by due date, plus their `Bundle`s and every pinned todo looked up once
-  (`pinned_todos`, `{ id => todo }`). `after` is what Done, and next opens: the next open one in
-  the bundle the todo was opened from (`from_bundle`), else in the list.
-- `Bundle` (a person's, `user_id`) has `Pin`s (`todo_id`, `position`): `pin` (at the bottom,
-  once), `unpin`, `move(todo, :up / :down)`. A todo gone from the core is skipped
-  (`todos_from`), never an error.
+- `MyDay::Day` is the page's query: the person's work (`Todo.assigned_to`, through
+  `Current.user.person`, so an agent's day is its person's), filtered (`SHOWS`) and searched
+  (title, engagement, client), in groups by due date, plus their priorities and every prioritised
+  todo looked up once (`pinned_todos`, `{ id => todo }`).
+- Priorities are a `Bundle` (one per person, `Bundle.priorities_for`, made when first needed) of
+  `Pin`s (`todo_id`, `position`): `place(todo, before:)` adds or moves, `move(todo, :up / :down)`,
+  `unpin`. A todo gone from the core is skipped (`todos_from`), never an error.
 - Status changes go through the core's verb (`todo.update(status:)`), so the todo's history
   records them as anywhere else.
-- The page is one turbo frame (`my_day`): picking, searching, filtering and every form reload only
-  it and keep the filter, search and bundle (`my_day_return_params`). The search box is
-  `data-turbo-permanent`, so typing keeps focus while the list reloads. Bundles unfold with a
-  native `<details>`; no JavaScript of the plugin's own.
+- The page is one page, reloaded in place: links and forms land back on `/my-day` with the same
+  filter, search and todo, which Turbo morphs with the scroll kept (the core's
+  `turbo_refreshes_with`). Not a turbo frame: Lexxy's editor (the notes) doesn't come back to
+  life in content a frame swaps in. The search box is `data-turbo-permanent`; the notes section is
+  rendered `permanent: false`, since its composer changes with the todo.
+- Dragging is the core's `drag-and-drop` controller (the contract): the priorities are a sortable
+  container posting to `priorities#create` (with `before`), the list a container posting to
+  `priorities/:todo_id/removal`. Their answer is a turbo stream refresh without a request id (so
+  Turbo doesn't skip it as its own echo); a session flag keeps the priorities unfolded after a
+  change.

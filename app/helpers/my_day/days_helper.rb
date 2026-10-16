@@ -3,20 +3,13 @@ module MyDay
     STATUS_LABELS = { "planned" => "Planned", "in_progress" => "In progress", "in_review" => "In review",
                       "blocked" => "Blocked", "done" => "Done" }.freeze
 
-    # A link to the day with this todo open, keeping the filter and search (and the bundle it's
-    # opened from, so Next follows the bundle).
-    def my_day_todo_path(todo, bundle: nil)
-      my_day_day_path({ todo: todo.id, show: params[:show], q: params[:q], from_bundle: bundle&.id }.compact_blank)
+    # A link to the day with this todo open, keeping the filter and search.
+    def my_day_todo_path(todo)
+      my_day_day_path({ todo: todo.id, show: params[:show], q: params[:q] }.compact_blank)
     end
 
-    # The day's filter, search and bundle, carried by a form so it comes back to the same view.
-    def my_day_return_params(bundle: @from_bundle)
-      { show: params[:show], q: params[:q], from_bundle: bundle&.id }.compact_blank
-    end
-
-    def my_day_return_fields(bundle: @from_bundle)
-      safe_join(my_day_return_params(bundle: bundle).map { |name, value| hidden_field_tag(name, value, id: nil) })
-    end
+    # The day's filter and search, carried by a form so it comes back to the same view.
+    def my_day_return_params = { show: params[:show], q: params[:q] }.compact_blank
 
     def my_day_status_label(todo) = STATUS_LABELS.fetch(todo.status, todo.status.humanize)
 
@@ -45,7 +38,7 @@ module MyDay
       tag.span(late ? "Late · #{text}" : text, class: class_names("my-day-due", "my-day-due--late": late))
     end
 
-    # "2 of 5 done" for a bundle's todos.
+    # "2 of 5 done" for the priorities.
     def my_day_progress(todos)
       "#{todos.count { it.status == "done" }} of #{todos.size} done"
     end

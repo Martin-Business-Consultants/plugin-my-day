@@ -7,27 +7,70 @@
     }
   }
 
+  /* The picked piece's card, and its notes under it. */
   .my-day-detail {
-    @media (min-width: 960px) {
-      inset-block-start: var(--block-space);
-      max-block-size: calc(100dvh - var(--block-space) * 2);
-      min-block-size: 0;
-      overflow-y: auto;
-      position: sticky;
-    }
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space);
+    min-inline-size: 0;
   }
 
-  .my-day-detail__heading {
+  .my-day-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space);
+  }
+
+  .my-day-card__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space-half);
+  }
+
+  .my-day-card__heading {
     align-items: start;
     display: flex;
     gap: var(--inline-space);
     justify-content: space-between;
   }
 
-  .my-day-detail__title {
-    font-size: var(--text-medium);
+  .my-day-card__title {
+    font-size: var(--text-large);
     font-weight: 650;
+    line-height: 1.25;
     margin: 0;
+  }
+
+  .my-day-card__facts {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--inline-space);
+  }
+
+  .my-day-card__description {
+    border-block-start: 1px solid var(--color-ink-lighter);
+    padding-block-start: var(--block-space);
+  }
+
+  .my-day-card__footer {
+    align-items: center;
+    border-block-start: 1px solid var(--color-ink-lighter);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--inline-space-half);
+    padding-block-start: var(--block-space);
+  }
+
+  .my-day-card__priority {
+    align-items: center;
+    color: var(--color-ink-medium);
+    display: inline-flex;
+    gap: 0.35em;
+  }
+
+  .my-day-card__open {
+    margin-inline-start: auto;
   }
 
   .my-day-tools {
@@ -132,18 +175,34 @@
     font-weight: 600;
   }
 
-  /* A bundle: pinned at the top, unfolding to its work in order. */
-  .my-day-bundle {
+  /* Priorities: the drop area at the top, unfolding to its work in order. */
+  .my-day-priorities {
     background-color: var(--color-ink-lightest);
+    border: 1px dashed transparent;
     border-radius: calc(0.5em * var(--radius-scale, 1));
     padding: var(--block-space-half) var(--inline-space-half);
+    transition: background-color 120ms ease, border-color 120ms ease;
 
-    &[open] .my-day-bundle__caret {
+    &[open] .my-day-priorities__caret {
       rotate: 0deg;
+    }
+
+    .scope-nav:not(:empty) {
+      margin-block-start: var(--block-space-half);
     }
   }
 
-  .my-day-bundle__summary {
+  .my-day-priorities--empty,
+  .my-day-priorities.drag-and-drop__hover-container {
+    border-color: var(--color-ink-light);
+  }
+
+  .my-day-priorities.drag-and-drop__hover-container {
+    background-color: oklch(var(--lch-blue-lightest));
+    border-color: var(--color-link);
+  }
+
+  .my-day-priorities__summary {
     align-items: center;
     cursor: pointer;
     display: flex;
@@ -159,47 +218,34 @@
     }
   }
 
-  .my-day-bundle__caret {
+  .my-day-priorities__caret {
     rotate: -90deg;
     transition: rotate 120ms ease;
   }
 
-  .my-day-bundle__done {
+  .my-day-priorities__done {
     color: oklch(var(--lch-green-dark));
     font-weight: 600;
   }
 
-  .my-day-bundle .scope-nav {
-    margin-block-start: var(--block-space-half);
+  .my-day-priorities__hint {
+    padding: var(--block-space) var(--inline-space-half) var(--block-space-half);
+    text-align: center;
   }
 
-  .my-day-bundle__actions {
-    align-items: start;
-    display: flex;
-    gap: var(--inline-space-half);
-    margin-block-start: var(--block-space-half);
+  .my-day-link[draggable="true"] {
+    cursor: grab;
   }
 
-  .my-day-inline[open] {
-    display: flex;
-    flex-direction: column;
-    gap: var(--block-space-half);
-  }
-
-  .my-day-inline > summary {
-    list-style: none;
-
-    &::-webkit-details-marker {
-      display: none;
-    }
-  }
-
-  .my-day-statuses,
-  .my-day-next {
-    align-items: center;
+  /* The status, one click away: a row of buttons, the current one filled. */
+  .my-day-statuses {
     display: flex;
     flex-wrap: wrap;
     gap: var(--inline-space-half);
+
+    form {
+      display: contents;
+    }
   }
 
   .my-day-statuses .btn[aria-pressed="true"] {
@@ -207,42 +253,44 @@
     color: var(--color-canvas);
   }
 
-  .my-day-owners,
-  .my-day-form-row {
+  .my-day-owners {
     align-items: center;
     display: flex;
     gap: var(--inline-space-half);
   }
 
-  .my-day-form-row .input {
-    flex: 1;
-    min-inline-size: 0;
-  }
-
-  .my-day-pins {
-    display: flex;
-    flex-direction: column;
-    gap: var(--block-space-half);
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .my-day-pin {
-    align-items: center;
-    display: flex;
-    gap: var(--inline-space);
-    justify-content: space-between;
-  }
-
-  .my-day-pin__actions {
-    align-items: center;
-    display: flex;
-    flex-shrink: 0;
-    gap: 0.25em;
-  }
-
   .my-day-down .icon {
     rotate: 180deg;
+  }
+
+  /* One size for every control on the page: buttons, fields and selects share a height, side
+     padding and text size, so a field and its button line up. Text areas, the drop box and menu
+     entries keep their own. On touch screens fields keep 16px text, so phones don't zoom in. */
+  :is(.my-day-split) {
+    --my-day-control-height: 2.25rem;
+
+    :is(.btn, input.input, select.input, label.input):not(.input--upload, .popup__btn, textarea) {
+      block-size: var(--my-day-control-height);
+      box-sizing: border-box;
+      font-size: var(--text-small);
+      line-height: 1.2;
+      padding-block: 0;
+    }
+
+    :is(.btn, input.input, label.input):not(.input--upload, .popup__btn, .btn--circle, .input--select) {
+      padding-inline: 0.75em;
+    }
+
+    .btn.btn--circle {
+      inline-size: var(--my-day-control-height);
+      justify-content: center;
+      padding-inline: 0;
+    }
+
+    @media (pointer: coarse) {
+      :is(input.input, select.input, label.input input) {
+        font-size: max(16px, var(--text-small));
+      }
+    }
   }
 }

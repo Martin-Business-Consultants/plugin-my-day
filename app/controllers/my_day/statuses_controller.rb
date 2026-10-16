@@ -1,6 +1,5 @@
 module MyDay
   # Moving a piece of work on from your day, through the core's own verb (its history records it).
-  # With next=, the day opens the piece after it: done, then on to the next.
   class StatusesController < ApplicationController
     allow_staff
     agent_tool :set_my_day_status, on: :update, title: "Set a piece of work's status from my day",
@@ -10,12 +9,7 @@ module MyDay
     def update
       todo = Todo.find(params[:todo_id])
       if change_status(todo, params.expect(:status))
-        label = todo.status.humanize.downcase
-        if params[:next].present?
-          back_to_day(todo: params[:next], notice: "“#{todo.title}” is #{label}. Next up.")
-        else
-          back_to_day(todo: todo.id, notice: "“#{todo.title}” is #{label}.")
-        end
+        back_to_day(todo: todo.id, notice: "“#{todo.title}” is #{todo.status.humanize.downcase}.")
       else
         back_to_day(todo: todo.id, alert: todo.errors.full_messages.to_sentence)
       end

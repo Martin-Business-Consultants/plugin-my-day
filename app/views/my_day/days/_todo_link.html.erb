@@ -1,8 +1,9 @@
-<%# locals: (todo:, bundle:, current:, number: nil) %>
-<%# One piece of work in the list or a bundle: its state, its title, where it's from and when it's
-    due. Picking it opens it on the right; from a bundle, Next then follows the bundle. %>
-<%= link_to my_day_todo_path(todo, bundle: bundle), class: class_names("scope-nav__item my-day-link", "my-day-link--done": todo.status == "done"),
-      aria: { current: ("page" if current) }, data: { turbo_frame: "my_day", turbo_action: "advance", filter_target: "item" } do %>
+<%# locals: (todo:, current:, number: nil) %>
+<%# One piece of work in the list or the priorities: its state, its title, where it's from and when
+    it's due. Click to open it on the right; drag it onto Priorities (or back off them). %>
+<%= link_to my_day_todo_path(todo), class: class_names("scope-nav__item my-day-link", "my-day-link--done": todo.status == "done"),
+      draggable: true, aria: { current: ("page" if current) },
+      data: { id: todo.id, drag_and_drop_target: "item", turbo_action: "replace", filter_target: "item" } do %>
   <span class="scope-nav__name">
     <% if number %>
       <span class="my-day-number txt-x-small txt-subtle"><%= number %></span>

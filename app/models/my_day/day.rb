@@ -1,6 +1,6 @@
 module MyDay
   # A person's day: the open work they lead or are on, found by search and narrowed by when it's
-  # due, in groups to work down (late, today, this week, later, no date), and their bundles.
+  # due, in groups to work down (late, today, this week, later, no date), and their priorities.
   class Day
     SHOWS = { "open" => "Everything open", "today" => "Due today or late", "week" => "Due this week",
               "done" => "Done this week", "all" => "Everything" }.freeze
@@ -39,36 +39,27 @@ module MyDay
         .filter_map { |key, title| Group.new(key: key, title: title, todos: buckets[key]) if buckets[key] }
     end
 
-    def bundles = @bundles ||= Bundle.for(user).includes(:pins).to_a
+    def priorities = @priorities ||= Bundle.priorities_for(user).tap { it.pins.load }
 
-    # Every pinned todo, looked up once, still open or not, whatever the filter.
+    # The priorities' todos in order, still open or not, whatever the filter or search.
+    def priority_todos = @priority_todos ||= priorities.todos_from(pinned_todos)
+
     def pinned_todos
-      @pinned_todos ||= Todo.where(id: bundles.flat_map { it.pins.map(&:todo_id) }.uniq)
+      @pinned_todos ||= Todo.where(id: priorities.pins.map(&:todo_id))
         .includes(:owner, { assignments: :user }, engagement: :client).index_by(&:id)
     end
 
-    def bundles_for(todo) = bundles.select { |bundle| bundle.pins.any? { it.todo_id == todo.id } }
-    def pinned?(todo) = pinned_todos.key?(todo.id)
+    def priority?(todo) = priorities.include?(todo)
 
     # The todo on the right: the one asked for if this person may see it, else the first still to
-    # do (a bundle's first, then the list's).
+    # do (the priorities' first, then the list's).
     def find(id)
       return if id.blank?
 
       pinned_todos[id.to_i] || todos.find { it.id == id.to_i } || Todo.assigned_to(user).includes(engagement: :client).find_by(id: id)
     end
 
-    def first
-      bundles.flat_map { it.todos_from(pinned_todos) }.find { it.status != "done" } || todos.find { it.status != "done" } || todos.first
-    end
-
-    # What comes after a todo: the next one still to do in the bundle it was opened from, else
-    # in the list.
-    def after(todo, bundle: nil)
-      list = bundle ? bundle.todos_from(pinned_todos) : groups.flat_map(&:todos)
-      index = list.index(todo)
-      (index ? list.drop(index + 1) : list).find { it.status != "done" && it != todo }
-    end
+    def first = priority_todos.find { it.status != "done" } || todos.find { it.status != "done" } || todos.first
 
     private
       def filtered(scope)

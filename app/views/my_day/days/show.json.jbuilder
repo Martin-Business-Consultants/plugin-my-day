@@ -6,19 +6,15 @@ todo_json = lambda do |json, todo|
   json.engagement todo.engagement.ref
   json.client todo.client.name
 end
+priorities = day.priority_todos
 
-json.summary "#{day.todos.size} #{"piece".pluralize(day.todos.size)} of work (#{MyDay::Day::SHOWS[day.show].downcase}" \
-  "#{", matching “#{day.query}”" if day.query.present?}), #{day.bundles.size} #{"bundle".pluralize(day.bundles.size)}" \
-  "#{"; open: #{@todo.title}" if @todo}"
+json.summary "#{priorities.size} #{"priority".pluralize(priorities.size)} (#{my_day_progress(priorities)}), " \
+  "#{day.todos.size} #{"piece".pluralize(day.todos.size)} of work (#{MyDay::Day::SHOWS[day.show].downcase}" \
+  "#{", matching “#{day.query}”" if day.query.present?})#{"; open: #{@todo.title}" if @todo}"
 json.show day.show
 json.q day.query.presence
-json.bundles day.bundles do |bundle|
-  todos = bundle.todos_from(day.pinned_todos)
-  json.extract! bundle, :id, :name
-  json.progress my_day_progress(todos)
-  json.todos todos do |todo|
-    todo_json.call(json, todo)
-  end
+json.priorities priorities do |todo|
+  todo_json.call(json, todo)
 end
 json.groups day.groups do |group|
   json.extract! group, :key, :title
@@ -30,7 +26,6 @@ if @todo
   json.todo do
     todo_json.call(json, @todo)
     json.description agent_text(@todo.description)
-    json.bundles day.bundles_for(@todo).map(&:name)
-    json.next(@next && { id: @next.id, title: @next.title })
+    json.priority priorities.index(@todo)&.then { it + 1 }
   end
 end
