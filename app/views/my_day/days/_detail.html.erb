@@ -93,6 +93,7 @@
         <%= icon_tag "pinned" %> <span>Add to priorities</span>
       <% end %>
     <% end %>
+    <%= render "todos/ai_brief", todo: todo, labelled: true %>
     <%= link_to todo, class: "btn my-day-card__open" do %>
       <span>Open in <%= term(:work) %></span> <%= icon_tag "arrow-right" %>
     <% end %>

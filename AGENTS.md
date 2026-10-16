@@ -64,3 +64,6 @@ Read first, in Runwell's repository:
 - Done work falls off the priorities: the `my_day.events` subscriber drops a todo's pins on its
   `todo.status` event to done (from anywhere), `StatusesController` does it at once, and
   `Day#priorities` prunes pins whose todo is done or gone.
+- Copy for AI: each row and the card render the core's `todos/ai_brief`; the bulk bar's
+  `bulk_copy` fetches `BriefsController#index` (text: a preface, then each todo's `Todo::Brief`
+  in the order picked, at most 25).

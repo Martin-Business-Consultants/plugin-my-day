@@ -1,7 +1,8 @@
 <%# locals: (todo:, current:, number: nil) %>
 <%# One piece of work in the list or the priorities: its number (in the priorities), its state
     (the dot, which a box takes over to pick it for the bulk bar, x), its title with the client
-    under it, its engagement's ref and when it's due. j / k move through the rows (the core's
+    under it, its engagement's ref, when it's due, and a copy button for its brief (c on the row
+    you're on: the core's todos/ai_brief). j / k move through the rows (the core's
     keyboard controller), Enter or o opens one on the right; drag it onto Priorities (or back off). %>
 <div class="<%= class_names("my-day-row", "my-day-row--current": current, "my-day-row--done": todo.status == "done", "my-day-row--waiting": todo.status.in?(MyDay::Day::WAITING)) %>" draggable="true"
      data-id="<%= todo.id %>" data-drag-and-drop-target="item" data-filter-target="item">
@@ -23,4 +24,5 @@
     <span class="my-day-link__ref"><%= todo.engagement.ref %></span>
     <%= my_day_due todo %>
   <% end %>
+  <%= render "todos/ai_brief", todo: todo %>
 </div>

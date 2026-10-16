@@ -281,6 +281,16 @@
       grid-area: 1 / 1;
       transition: opacity 120ms ease;
     }
+
+    /* The dot never takes a click (faded out, it would sit over the box and swallow it). */
+    > :not(.my-day-row__check) {
+      pointer-events: none;
+    }
+
+    > .my-day-row__check {
+      position: relative;
+      z-index: 1;
+    }
   }
 
   .my-day-row__check.checkbox {
@@ -327,6 +337,20 @@
       color: var(--color-ink);
       font-weight: 500;
     }
+  }
+
+  /* The row's Copy for AI (the core's todos/ai_brief, c on the row you're on): there when it's
+     wanted, out of the way otherwise. */
+  .my-day-split .my-day-row .ai-brief.btn--circle {
+    --btn-size: 1.75rem;
+
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 120ms ease;
+  }
+
+  .my-day-row:is(:hover, :focus-within, [data-keyboard-current], .my-day-row--current) .ai-brief {
+    opacity: 1;
   }
 
   .my-day-link__text {

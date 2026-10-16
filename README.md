@@ -26,6 +26,11 @@ Then switch it on in Settings › Plugins.
   due pill (today in blue, late in red); work in review or blocked is quieter. A search box above
   it (as you type: the title, its engagement or its client) and tabs: Open, Today (due today or
   late), Week, Done (this week) and All.
+- **Copy for AI**: each row has a copy button (or `c` on the row you're on) for the prompt to
+  complete that piece of work: the core's brief, with what was agreed, the notes, and the
+  `runwell` commands to report back. Pick several and Copy for AI in the bulk bar copies one
+  prompt that has a local AI (Claude Code, say) work through them one at a time, in order, and
+  sum up at the end. The card has the same button.
 - **Vim keys and bulk actions**: `j` / `k` move through the list (`gg` and `G` to the first and
   last), Enter or `o` opens the one you're on, and `x` picks it (or tick its box). With any picked,
   a bar above the list adds them to your priorities or takes them off, and sets their status, due
