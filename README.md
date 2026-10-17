@@ -5,7 +5,7 @@ the day.
 
 A Runwell plugin (Runwell's `docs/plugins.md`): a Rails engine that owns its `my_day_*` tables,
 points at people and work by id, and extends the core only through the plugin contract. Needs
-Runwell 2.25.4 or newer.
+Runwell 2.29 or newer.
 
 ## Install
 

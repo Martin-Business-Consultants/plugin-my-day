@@ -104,7 +104,13 @@
             priorities' own. %>
         <% keep = my_day_return_params.merge(todo: todo&.id).compact_blank %>
         <%= bulk_bar do %>
-          <%= bulk_copy my_day_briefs_path, label: "Copy for AI" %>
+          <button type="button" class="btn input txt-x-small bulk-bar__pill my-day-copy" data-controller="my-day--copy-prompt"
+                  data-my-day--copy-prompt-url-value="<%= my_day_briefs_path %>" data-my-day--copy-prompt-copied-class="my-day-copy--copied"
+                  data-action="my-day--copy-prompt#copy">
+            <%= icon_tag "ai" %>
+            <span class="my-day-copy__label">Copy for AI</span>
+            <span class="my-day-copy__done">Copied</span>
+          </button>
           <%= bulk_button my_day_bulk_priorities_path, method: :post, label: "Prioritize", params: keep %>
           <%= bulk_button my_day_bulk_priorities_path, method: :delete, label: "Take off", params: keep %>
           <%= bulk_menu bulk_todos_path, method: :patch, name: "todo[status]", label: "Status", choices: MyDay::DaysHelper::STATUS_LABELS.invert.to_a %>

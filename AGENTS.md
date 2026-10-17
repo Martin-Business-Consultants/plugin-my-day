@@ -65,5 +65,9 @@ Read first, in Runwell's repository:
   `todo.status` event to done (from anywhere), `StatusesController` does it at once, and
   `Day#priorities` prunes pins whose todo is done or gone.
 - Copy for AI: each row and the card render the core's `todos/ai_brief`; the bulk bar's
-  `bulk_copy` fetches `BriefsController#index` (text: a preface, then each todo's `Todo::Brief`
+  Copy for AI (`my-day--copy-prompt`) fetches `BriefsController#index` (text: a preface, then each todo's `Todo::Brief`
   in the order picked, at most 25).
+- The plugin's own JavaScript is `app/javascript/my_day/controllers/`: `copy_prompt_controller.js`
+  (`my-day--copy-prompt`, the bulk bar's Copy for AI: reads the picked boxes, fetches
+  `BriefsController` with their ids, copies). Everything else uses the core controllers the
+  contract lists (`form`, `drag-and-drop`, `bulk`, `copy-to-clipboard` through `todos/ai_brief`).

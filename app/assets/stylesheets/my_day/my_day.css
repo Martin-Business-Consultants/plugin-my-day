@@ -488,6 +488,13 @@
     }
   }
 
+  /* The bulk bar's Copy for AI (my-day--copy-prompt): says Copied once the prompt is on the clipboard. */
+  .my-day-copy__done { display: none; }
+  .my-day-copy--copied {
+    .my-day-copy__label { display: none; }
+    .my-day-copy__done { display: inline; }
+  }
+
   /* The card: a breadcrumb, the title, a row of pill controls, details, priority, notes. */
   .my-day-card.panel {
     display: flex;

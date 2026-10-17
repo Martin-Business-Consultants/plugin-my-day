@@ -43,7 +43,7 @@ module MyDay
 
     config.to_prepare do
       Runwell::Plugins.register :my_day, name: "My day", version: MyDay::VERSION,
-        author: "Martin Business Consultants", enabled_by_default: false, requires: ">= 2.28.0",
+        author: "Martin Business Consultants", enabled_by_default: false, requires: ">= 2.29.0",
         homepage: "https://github.com/Martin-Business-Consultants/plugin-my-day",
         description: "Your work in one list, searched and filtered, with the one you pick open beside it, and the work " \
                      "you drag to the top as your priorities, in the order you mean to do it: a way to work through the day."
